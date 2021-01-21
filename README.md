@@ -54,10 +54,10 @@ conda env create -f environment.yml
 *   Source image file path
 *   Source image Python file object (maybe?)
 *   Option(s)
-    * Don't relate diagonals
-        * For each pixel, only consider as adjacent the four (4) neighbours with
+    * Relate Diagonals
+        * `True` by default. All 8 neighbours are considered adjacent.
+        * If `False`, only consider as adjacent the four (4) neighbours with
         a common edge. (top, bottom, left, and right neighbours)
-        * By default, all 8 neighbours are considered adjacent.
 
 ## Known limitations
 *   (none yet)
