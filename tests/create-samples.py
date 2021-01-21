@@ -24,5 +24,8 @@ cells = [
     [ gre, gre, red, red, red, red, blu, blu, mag ]
 ]
 
-for r, row in enumerate(cells):
-    print("Row {} has len {}".format(r, len(row)))
+header = "\t".join(["row", "col","r", "g", "b", "a"])
+print(header)
+for rowIx, row in enumerate(cells):
+    for colIx, cell in enumerate(row):
+        print(rowIx, colIx, *cell, sep="\t")
