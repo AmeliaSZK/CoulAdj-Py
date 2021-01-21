@@ -9,6 +9,8 @@ import numpy as np
 
 
 # # Dev stuff
+# 
+# Specify where _in this repo_ the input and output files are.
 
 # In[2]:
 
@@ -19,23 +21,46 @@ samples = {
     "shadow" : "tests/proprietary/warhammer_map_1_1_shadow.bmp",
     "vortex" : "tests/proprietary/wh2_main_great_vortex_map_6.bmp"
 }
+results = {
+    "small" : "tests/result small.tsv",
+    "small-alpha" : "tests/result small-alpha.tsv",
+    "shadow" : "tests/proprietary/result warhammer_map_1_1_shadow.tsv",
+    "vortex" : "tests/proprietary/result wh2_main_great_vortex_map_6.tsv"
+}
 
 
-# # Input
-# Write your inputs here:
+# # Selection of Sample to Test
+# 
+# Choose the test to run here.
+# 
+# If you don't have the proprietary images, pick either `"small"` or `"small-alpha"`.
+# (You almost certainly don't have them)
 
 # In[3]:
 
 
-source = samples["small-alpha"]
-relateDiagonals = True # Default is True
-print(source)
+test = "small-alpha"
 
 
-# # Process
-# (Output is after this section)
+# # Input
+# 
+# ~~Write your inputs here:~~
+# 
+# During development, specify your input in the section above.
 
 # In[4]:
+
+
+source = samples[test]
+destination = results[test]
+relateDiagonals = True # Default is True
+print(source)
+print(destination)
+
+
+# # Processing
+
+# In[5]:
 
 
 image = imageio.imread(source)
@@ -50,25 +75,12 @@ maxColumn = nbColumns -1
 print(nbRows, nbColumns, maxRow, maxColumn)
 
 
-# In[5]:
-
-
-# Print pixel data for debug
-print("\t".join(["row", "col", "r", "g", "b", "a"]))
-for row in range(nbRows):
-    for column in range(nbColumns):
-        print(row, column, "\t".join(map(str, image[row, column])), sep="\t")
-        
-R_INDEX = 0
-G_INDEX = 1
-B_INDEX = 2
-A_INDEX = 3
-
-
 # In[6]:
 
 
 def process_pixel(pixelRow, pixelColumn):
+    if pixelColumn == 0 and pixelRow % 10 == 0:
+        print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
@@ -83,7 +95,7 @@ def process_pixel(pixelRow, pixelColumn):
         
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
     neighRow = pixelRow + rowOffset
-    neighColumn = pixelColumn
+    neighColumn = pixelColumn + columnOffset
     if not valid_row_column(neighRow, neighColumn): 
         return
     neighColour = tuple(image[neighRow, neighColumn].tolist())
@@ -111,10 +123,10 @@ for row in range(nbRows):
     for column in range(nbColumns):
         process_pixel(row, column)
 
-print(adjacencies)
 
+# # Output
 
-# In[11]:
+# In[7]:
 
 
 COLUMN_SEPARATOR = "\t"
@@ -169,8 +181,9 @@ stringyfied = stringify()
 print(stringyfied)
 
 
-# In[ ]:
+# In[8]:
 
 
-
+with open(destination, "w") as file:
+    file.write(stringyfied)
 
