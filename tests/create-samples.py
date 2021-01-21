@@ -14,14 +14,15 @@ mag = magenta_4
 yel = yellow_2  
 
 cells = [
-    [ [yel]*5, [mag]*3, [red]*1 ],
-    [ [yel]*4, [cya]*1, [mag]*4 ],
-    [ [gre]*2, [yel]*2, [cya]*4, [mag]*1 ],
-    [ [gre]*2, [yel]*2, [cya]*4, [mag]*1 ],
-    [ [gre]*4, [blu]*4, [mag]*1 ],
-    [ [gre]*4, [blu]*4, [mag]*1 ],
-    [ [gre]*4, [blu]*4, [mag]*1 ],
-    [ [gre]*2, [red]*4, [blu]*2, [mag]*1 ]
+    [ yel, yel, yel, yel, yel, mag, mag, mag, red ],
+    [ yel, yel, yel, yel, cya, mag, mag, mag, mag ],
+    [ gre, gre, yel, yel, cya, cya, cya, cya, mag ],
+    [ gre, gre, yel, yel, cya, cya, cya, cya, mag ],
+    [ gre, gre, gre, gre, blu, blu, blu, blu, mag ],
+    [ gre, gre, gre, gre, blu, blu, blu, blu, mag ],
+    [ gre, gre, gre, gre, blu, blu, blu, blu, mag ],
+    [ gre, gre, red, red, red, red, blu, blu, mag ]
 ]
 
-print(cells)
+for r, row in enumerate(cells):
+    print("Row {} has len {}".format(r, len(row)))
