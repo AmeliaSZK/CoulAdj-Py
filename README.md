@@ -38,14 +38,16 @@ conda env create -f environment.yml
 ```
 
 ## To Run
+1. Read these instructions
+1. Take a quick look at the source code to see if they still make sense (sorry 😅)
+1. While you're in the source code, modify the input variables at the
+top of the file to suit what you want to run in the program (Gotcha 😎)
 1. On the command line, navigate to the cloned repository
 1. Run these commands:
     ```
     conda activate CoulAdj-Py
-    jupyter notebook
+    python CoulAdj-Py.py
     ```
-1. Open the CoulAdj-Py notebook
-1. Follow the instructions in the notebook
 
 
 # API
@@ -65,7 +67,7 @@ conda env create -f environment.yml
 
 ## Output
 *   TSV File
-*   Python native object
+*   Python native object (maybe?)
 
 ### TSV File
 *   Tab-separated values (tsv)
