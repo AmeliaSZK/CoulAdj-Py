@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import imageio
 import numpy as np
 
@@ -11,8 +5,6 @@ import numpy as np
 # # Dev stuff
 # 
 # Specify where _in this repo_ the input and output files are.
-
-# In[2]:
 
 
 samples = {
@@ -36,19 +28,14 @@ results = {
 # If you don't have the proprietary images, pick either `"small"` or `"small-alpha"`.
 # (You almost certainly don't have them)
 
-# In[3]:
-
-
 test = "small-alpha"
 
 
 # # Input
 # 
-# ~~Write your inputs here:~~
+# (Don't) Write your inputs here:
 # 
-# During development, specify your input in the section above.
-
-# In[4]:
+# (During development, specify your input in the section above.)
 
 
 source = samples[test]
@@ -60,9 +47,6 @@ print(destination)
 
 # # Processing
 
-# In[5]:
-
-
 image = imageio.imread(source)
 print(image.shape)
 print(image.meta)
@@ -73,9 +57,6 @@ nbColumns = image.shape[1]
 maxRow = nbRows - 1
 maxColumn = nbColumns -1
 print(nbRows, nbColumns, maxRow, maxColumn)
-
-
-# In[6]:
 
 
 def process_pixel(pixelRow, pixelColumn):
@@ -125,8 +106,6 @@ for row in range(nbRows):
 
 
 # # Output
-
-# In[7]:
 
 
 COLUMN_SEPARATOR = "\t"
@@ -179,9 +158,6 @@ def stringify():
 
 stringyfied = stringify()
 print(stringyfied)
-
-
-# In[8]:
 
 
 with open(destination, "w") as file:
