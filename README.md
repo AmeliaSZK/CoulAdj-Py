@@ -1,8 +1,7 @@
 # Colour Adjacencies
-Reads an image and outputs the colour adjacencies in a TSV format.
-Intended to be used in a web browser locally, without sending any data to a server.
+Reads an image and outputs the colour adjacencies.
 
-Primary objective is to help me learn basic web development. 
+Primary objective is to help me learn Python. 
 
 This project declares conformity to [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 There is currently no API version number, because there has been no public release.
@@ -12,28 +11,48 @@ There is currently no API version number, because there has been no public relea
 "Colour" and "color" will be used interchangeably and arbitrarily in both the code
 and documentation.
 
-Long term objective is to port this as an Excel Add-In.
+Long term objective is to publish as a module on PIP.
 
 # About this Github repository
 
 *   I made this Github repository public so I could share with my twitter friends.
 *   It may be made private in the future.
 
+# Known or Assumed Requirements
+
+* [Anaconda](https://www.anaconda.com/products/individual)
+    * Development was done with the Individual Edition (Distribution)
+    * _NB: Upon install, Anaconda will modify your command line prompt to prefix
+        it with the active environment in parenthesis._
 
 # How to run
 
-1. Clone the git repository
-1. Open `index.html` in your favourite web browser
+**NB: These instructions have not been tested on Windows**
 
-This project is being developed with Visual Studio Code and tested with mostly
-Microsoft Edge for Linux and sometimes Google Chrome. I don't know how this choice
-of tools can affect development and compatibility.
+## First time setup
+1. Clone the git repository
+1. On the command line, navigate to the cloned repository
+1. Run this command:
+```
+conda env create -f environment.yml
+```
+
+## To Run
+1. On the command line, navigate to the cloned repository
+1. Run these commands:
+    ```
+    conda activate CoulAdj-Py
+    jupyter notebook
+    ```
+1. Open the CoulAdj-Py notebook
+1. Follow the instructions in the notebook
 
 
 # API
 
 ## Input 
-*   Source image file
+*   Source image file path
+*   Source image Python file object (maybe?)
 *   Option(s)
     * Don't relate diagonals
         * For each pixel, only consider as adjacent the four (4) neighbours with
@@ -41,15 +60,15 @@ of tools can affect development and compatibility.
         * By default, all 8 neighbours are considered adjacent.
 
 ## Known limitations
-*   Images with more than 8 bits per color channel are not supported.
-*   Internet Explorer not supported, and will not be.
-*   Safari not compatible until they support [createImageBitmap](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap#Browser_compatibility).
-*   Firefox not (yet) compatible because I don't know how to detect that a browser 
-will only support 1 argument in a function call. To be fixed.
+*   (none yet)
 
 
 ## Output
-*   Tab-separated values. (tsv)
+*   TSV File
+*   Python native object
+
+### TSV File
+*   Tab-separated values (tsv)
     *   [Summary on Wikipedia](https://en.wikipedia.org/wiki/Tab-separated_values) 
     *   [Official specifications](https://www.iana.org/assignments/media-types/text/tab-separated-values)
 
@@ -127,3 +146,6 @@ a color cannot be adjacent with itself.
     | `adj_a`   |Adjacent Alpha |
 
 *   The line-endings may be either in Windows (CRLF) or Unix (LF) style.
+
+### Python Native Object
+(To be completed)

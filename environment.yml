@@ -1,0 +1,10 @@
+name: CoulAdj-Py
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python>=3.6
+  - pip
+  - numpy
+  - imageio
+  - jupyter
