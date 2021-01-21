@@ -114,6 +114,61 @@ for row in range(nbRows):
 print(adjacencies)
 
 
+# In[11]:
+
+
+COLUMN_SEPARATOR = "\t"
+
+"""
+DO NOT CHANGE THESE HEADERS
+
+These headers are part of the API defined in the Readme.
+They MUST NOT be changed unless the major version number is incremented.
+
+The outputted files are meant to be parsed by programs that rely on
+   hardcoded column names.
+
+THE NAMES OF THE COLUMNS, AND THE ORDER IN WHICH THEY ARE WRITTEN,
+   ARE THE MOST CRITICAL PART OF THE API.
+
+DO NOT CHANGE
+
+DO NOT CHANGE
+"""
+HEADERS = {
+    "RGB" : COLUMN_SEPARATOR.join(["r", "g", "b", "adj_r", "adj_g", "adj_b"]),
+    "RGB_ALPHA" : COLUMN_SEPARATOR.join(["r", "g", "b", "a", "adj_r", "adj_g", "adj_b", "adj_a"])
+}
+
+def stringify():
+    nbChannels = image.shape[2]
+    if nbChannels == 3:
+        header = HEADERS["RGB"]
+    elif nbChannels == 4:
+        header = HEADERS["RGB_ALPHA"]
+    else:
+        raise TypeError("Image must have 3 or 4 channels")
+    
+    sortedAdjacencies = [header]
+    sortedPixels = sorted(adjacencies.keys())
+    for pixel in sortedPixels:
+        neighboursAsSet = adjacencies[pixel]
+        sortedNeighbours = sorted(list(neighboursAsSet))
+        for neighbour in sortedNeighbours:
+            sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
+            
+    """
+    TSV specification say that each line must end with EOL
+    https://www.iana.org/assignments/media-types/text/tab-separated-values
+    """
+    joinedAdjacencies = "\n".join(sortedAdjacencies)
+    conformToTsvSpecifications = joinedAdjacencies + "\n"
+    return conformToTsvSpecifications
+
+stringyfied = stringify()
+print(stringyfied)
+
+
 # In[ ]:
 
 
