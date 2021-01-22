@@ -62,5 +62,5 @@ for cellRow, row in enumerate(cells):
 fill_cell(pythonList, 0, -1, cells[0][-2], factor)
 pythonList[0][-1] = cells[0][-1]
 
-print_pixel_data(pythonList)
+numpyArray = np.array(pythonList)
 
