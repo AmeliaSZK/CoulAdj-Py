@@ -93,10 +93,8 @@ def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffse
     
     
 def valid_row_column(row, column):
-    return (0 <= row
-           and 0 <= column
-           and row <= maxRow
-           and column <= maxColumn)
+    return (0 <= row <= maxRow
+           and 0 <= column <= maxColumn)
 
 def same_colours(a, b):
     for i in range(len(a)):

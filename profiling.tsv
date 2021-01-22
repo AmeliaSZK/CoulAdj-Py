@@ -5,3 +5,4 @@ time	Name	Description
  8.75s	Assert	Reverted to Assert from Numpy
  7.03s	Bytes	Now using tobytes() instead of tuple(.tolist())
  6.92s	Diag	Stopped checking for relateDiagonals
+ 6.93s	Bool	Made valid_row_column check more readable
