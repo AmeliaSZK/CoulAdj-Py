@@ -66,7 +66,71 @@ BOT_OFFSET = 1
 LEF_OFFSET = -1
 RIG_OFFSET = 1
 
-def process_pixel(pixelRow, pixelColumn):
+def process_top_left_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+
+def process_top_right_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+
+def process_bottom_left_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+
+def process_bottom_right_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+
+def process_top_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+
+def process_bottom_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+
+def process_left_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+
+def process_right_pixel(pixelRow, pixelColumn):
+    pixelColour = image[pixelRow, pixelColumn].tobytes()
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+
+def process_middle_pixel(pixelRow, pixelColumn):
     if pixelColumn == 1 and pixelRow % 10 == 0:
         print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
         if pixelRow == 50:
@@ -107,9 +171,25 @@ def same_colours(a, b):
             return False
     return True
 
-for row in range(nbRows):
-    for column in range(nbColumns):
-        process_pixel(row, column)
+# Corners
+process_top_left_pixel(0, 0)
+process_top_right_pixel(0, maxColumn)
+process_bottom_left_pixel(maxRow, 0)
+process_bottom_right_pixel(maxRow, maxColumn)
+
+# Edges
+for column in range(1, nbColumns-1):
+    process_top_pixel(0, column)
+    process_bottom_pixel(maxRow, column)
+
+for row in range(1, nbRows-1):
+    process_left_pixel(row, 0)
+    process_right_pixel(row, maxColumn)
+
+# Middle
+for row in range(1, nbRows-1):
+    for column in range(1, nbColumns-1):
+        process_middle_pixel(row, column)
 
 
 # # Output
