@@ -74,11 +74,11 @@ def process_pixel(pixelRow, pixelColumn):
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, -1, -1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 1)
-    if relateDiagonals:
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 0)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, 1)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, -1)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 0)
+    #if relateDiagonals:
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, 1)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, -1)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 0)
 
         
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
