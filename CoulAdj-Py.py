@@ -1,5 +1,6 @@
 import imageio
 import numpy as np
+import time
 
 
 # # Dev stuff
@@ -28,7 +29,7 @@ results = {
 # If you don't have the proprietary images, pick either `"small"` or `"small-alpha"`.
 # (You almost certainly don't have them)
 
-test = "small-alpha"
+test = "shadow"
 
 
 # # Input
@@ -58,10 +59,16 @@ maxRow = nbRows - 1
 maxColumn = nbColumns -1
 print(nbRows, nbColumns, maxRow, maxColumn)
 
+startTime = time.time()
 
 def process_pixel(pixelRow, pixelColumn):
     if pixelColumn == 0 and pixelRow % 10 == 0:
         print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
+        if pixelRow == 50:
+            endTime = time.time()
+            duration = int((endTime - startTime) // 1)
+            print(duration)
+            quit()
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
@@ -98,7 +105,6 @@ def same_colours(a, b):
         if a[i] != b[i]:
             return False
     return True
-
 
 for row in range(nbRows):
     for column in range(nbColumns):
