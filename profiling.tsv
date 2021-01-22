@@ -2,3 +2,4 @@ time	Name	Description
  8.80s	Base	No optimization done yet
  8.65s	Assert	Removed the check in same_colours for equal length
 25.40s	Numpy	Used numpy.array_equal instead of same_colours
+ 8.75s	Assert	Reverted to Assert from Numpy

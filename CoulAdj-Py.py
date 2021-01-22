@@ -69,7 +69,7 @@ def process_pixel(pixelRow, pixelColumn):
             duration = round(endTime - startTime, 2)
             print(duration)
             quit()
-    pixelColour = image[pixelRow, pixelColumn]
+    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, -1, -1)
@@ -86,10 +86,10 @@ def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffse
     neighColumn = pixelColumn + columnOffset
     if not valid_row_column(neighRow, neighColumn): 
         return
-    neighColour = image[neighRow, neighColumn]
-    if np.array_equal(pixelColour, neighColour): 
+    neighColour = tuple(image[neighRow, neighColumn].tolist())
+    if same_colours(pixelColour, neighColour): 
         return
-    adjacencies.setdefault(tuple(pixelColour.tolist()), set()).add(tuple(neighColour.tolist()))
+    adjacencies.setdefault(pixelColour, set()).add(neighColour)
     
     
 def valid_row_column(row, column):
