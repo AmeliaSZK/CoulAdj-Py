@@ -62,7 +62,7 @@ print(nbRows, nbColumns, maxRow, maxColumn)
 def process_pixel(pixelRow, pixelColumn):
     if pixelColumn == 0 and pixelRow % 10 == 0:
         print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
-    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
+    pixelColour = image[pixelRow, pixelColumn]
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, -1, -1)
@@ -79,10 +79,10 @@ def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffse
     neighColumn = pixelColumn + columnOffset
     if not valid_row_column(neighRow, neighColumn): 
         return
-    neighColour = tuple(image[neighRow, neighColumn].tolist())
-    if same_colours(pixelColour, neighColour): 
+    neighColour = image[neighRow, neighColumn]
+    if np.array_equal(pixelColour, neighColour): 
         return
-    adjacencies.setdefault(pixelColour, set()).add(neighColour)
+    adjacencies.setdefault(tuple(pixelColour.tolist()), set()).add(tuple(neighColour.tolist()))
     
     
 def valid_row_column(row, column):
@@ -90,14 +90,6 @@ def valid_row_column(row, column):
            and 0 <= column
            and row <= maxRow
            and column <= maxColumn)
-
-def same_colours(a, b):
-    if len(a) != len(b):
-        raise TypeError("Colours from the same image should have the same number of channels.")
-    for i in range(len(a)):
-        if a[i] != b[i]:
-            return False
-    return True
 
 
 for row in range(nbRows):
