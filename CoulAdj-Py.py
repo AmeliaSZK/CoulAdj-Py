@@ -59,14 +59,14 @@ maxRow = nbRows - 1
 maxColumn = nbColumns -1
 print(nbRows, nbColumns, maxRow, maxColumn)
 
-startTime = time.time()
+startTime = time.perf_counter()
 
 def process_pixel(pixelRow, pixelColumn):
     if pixelColumn == 0 and pixelRow % 10 == 0:
         print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
         if pixelRow == 50:
-            endTime = time.time()
-            duration = int((endTime - startTime) // 1)
+            endTime = time.perf_counter()
+            duration = round(endTime - startTime, 2)
             print(duration)
             quit()
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
