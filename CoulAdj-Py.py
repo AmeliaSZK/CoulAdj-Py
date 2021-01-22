@@ -28,7 +28,7 @@ results = {
 # If you don't have the proprietary images, pick either `"small"` or `"small-alpha"`.
 # (You almost certainly don't have them)
 
-test = "small-alpha"
+test = "shadow"
 
 
 # # Input
