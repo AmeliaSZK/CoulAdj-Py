@@ -153,8 +153,6 @@ def process_middle_pixel(pixelRow, pixelColumn):
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
     neighRow = pixelRow + rowOffset
     neighColumn = pixelColumn + columnOffset
-    if not valid_row_column(neighRow, neighColumn): 
-        return
     neighColour = image[neighRow, neighColumn].tobytes()
     if pixelColour == neighColour: 
         return

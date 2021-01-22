@@ -8,3 +8,4 @@ time	Name	Description
  6.93s	Bool	Made valid_row_column check more readable
  7.04s	Prep	Preparing to remove validity checks. No improvement was expected.
  7.24s	Base2	New baseline to measure removal of valid_row_column check.
+ 6.53s	Check	Removed coordinate check on every neighbour. (not even a 1s improvement?! 😢)
