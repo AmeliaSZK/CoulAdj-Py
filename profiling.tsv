@@ -6,3 +6,4 @@ time	Name	Description
  7.03s	Bytes	Now using tobytes() instead of tuple(.tolist())
  6.92s	Diag	Stopped checking for relateDiagonals
  6.93s	Bool	Made valid_row_column check more readable
+ 7.04s	Prep	Preparing to remove validity checks. No improvement was expected.

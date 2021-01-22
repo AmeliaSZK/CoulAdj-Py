@@ -61,8 +61,13 @@ print(nbRows, nbColumns, maxRow, maxColumn)
 
 startTime = time.perf_counter()
 
+TOP_OFFSET = -1
+BOT_OFFSET = 1
+LEF_OFFSET = -1
+RIG_OFFSET = 1
+
 def process_pixel(pixelRow, pixelColumn):
-    if pixelColumn == 0 and pixelRow % 10 == 0:
+    if pixelColumn == 1 and pixelRow % 10 == 0:
         print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
         if pixelRow == 50:
             endTime = time.perf_counter()
@@ -70,15 +75,15 @@ def process_pixel(pixelRow, pixelColumn):
             print(duration)
             quit()
     pixelColour = image[pixelRow, pixelColumn].tobytes()
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 1)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
     #if relateDiagonals:
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 0)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, 1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
 
         
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
