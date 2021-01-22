@@ -1,2 +1,3 @@
 time	Name	Description
  8.80s	Base	No optimization done yet
+ 8.65s	Assert	Removed the check in same_colours for equal length

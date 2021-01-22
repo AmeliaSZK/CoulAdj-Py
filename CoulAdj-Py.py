@@ -99,8 +99,6 @@ def valid_row_column(row, column):
            and column <= maxColumn)
 
 def same_colours(a, b):
-    if len(a) != len(b):
-        raise TypeError("Colours from the same image should have the same number of channels.")
     for i in range(len(a)):
         if a[i] != b[i]:
             return False
