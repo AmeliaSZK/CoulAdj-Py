@@ -25,6 +25,18 @@ Additionally, the alpha value must represent a unique RGB combination.
 1. When looking at the image from top-left to top-right, from top to bottom,
 the colours must appear such that those with the lower alpha values appear first.
 
+## Hex values
+|   r |   g |   b |   a | Name       | Id |
+|-----|-----|-----|-----|------------|----|
+|  0a |  14 |  e6 |  fc | Blue       | 12 |
+|  0a |  dc |  1e |  fa | Green      | 10 |
+|  0a |  dc |  e6 |  f8 | Cyan       |  8 |
+|  d2 |  14 |  1e |  f6 | Red        |  6 |
+|  d2 |  14 |  e6 |  f4 | Magenta    |  4 |
+|  d2 |  dc |  1e |  f2 | Yellow     |  2 |
+
+Use `$ hexdump filename` on Linux.
+
 # Rationale
 
 The rules regarding what colour is allowed were designed to accomplish these goals:
