@@ -49,6 +49,22 @@ top of the file to suit what you want to run in the program (Gotcha 😎)
     python CoulAdj-Py.py
     ```
 
+## How to update Anaconda environment
+During development, more packages may need to be added to the Anaconda environment.
+This is how you can update it, when you are already in the CoulAdj-Py environment:
+
+1. Modify the environment.yml file to include the package to add
+1. Execute these commands in the terminal:
+    ```
+    (CoulAdj-Py) $ conda deactivate
+    (base) $ conda env update -f environment.yml
+    (base) $ conda activate CoulAdj-Py
+    (CoulAdj-Py) $
+    ```
+    In these instructions, the `(CoulAdj-Py)` and `(base)` are inserted by
+    Anaconda in your terminal to signal which environment is currently active.
+    The `$` represents your terminal prompt.
+
 
 # API
 
