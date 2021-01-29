@@ -35,8 +35,8 @@ def print_pixel_data(pythonList):
         for colIx, pixel in enumerate(row):
             print(rowIx, colIx, *pixel, sep="\t")
 
-size = 1024
-savefilename = "sample-size-1024.png"
+size = 4
+savefilename = "sample-size-4.png"
 nbCellRows = len(cells)
 nbCellCols = len(cells[0])
 nbRows = size * nbCellRows 
@@ -102,4 +102,41 @@ plt.show()
 print(im.getpixel(topLeftPixel), im.getpixel(topRighPixel))
 print(im.getpixel(botLeftPixel), im.getpixel(botRighPixel))
 
-im.save(savefilename)
+#im.save(savefilename)
+
+im_1 = Image.open("sample-size-1.png")
+im_4 = Image.open("sample-size-4.png")
+im_16 = Image.open("sample-size-16.png")
+im_256 = Image.open("sample-size-256.png")
+im_1024 = Image.open("sample-size-1024.png")
+
+def format_pixel(pixel):
+    formattedChannels = map(lambda x: "{:>3}".format(x), pixel)
+    joined = ", ".join(formattedChannels)
+    enclosed = "(" + joined + ")"
+    return enclosed
+    
+def print_corners(im, size):
+    maxRow = im.height - 1
+    maxCol = im.width - 1
+    
+    topLeftPixel = rowCol_to_XY_tuple(     0,      0)
+    topRighPixel = rowCol_to_XY_tuple(     0, maxCol)
+    botLeftPixel = rowCol_to_XY_tuple(maxRow,      0)
+    botRighPixel = rowCol_to_XY_tuple(maxRow, maxCol)
+    
+    formatted_topLeft = format_pixel(im.getpixel(topLeftPixel))
+    formatted_topRigh = format_pixel(im.getpixel(topRighPixel))
+    formatted_botLeft = format_pixel(im.getpixel(botLeftPixel))
+    formatted_botRigh = format_pixel(im.getpixel(botRighPixel))
+    
+    print("Size {}: (width = {}, height = {})".format(size, im.width, im.height))
+    print(formatted_topLeft, formatted_topRigh)
+    print(formatted_botLeft, formatted_botRigh)
+    print()
+
+print_corners(im_1, 1)
+print_corners(im_4, 4)
+print_corners(im_16, 16)
+print_corners(im_256, 256)
+print_corners(im_1024, 1024)
