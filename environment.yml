@@ -9,3 +9,4 @@ dependencies:
   - imageio
   - jupyter
   - pillow
+  - matplotlib

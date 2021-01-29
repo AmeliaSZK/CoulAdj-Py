@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image, ImageDraw
 
 blue_12     = ( 10,  20, 230, 252)
 green_10    = ( 10, 220,  30, 250)
@@ -33,34 +34,15 @@ def print_pixel_data(pythonList):
         for colIx, pixel in enumerate(row):
             print(rowIx, colIx, *pixel, sep="\t")
 
-size = 2
-factor = 2**size
+size = 1
+nbX = size * len(cells) # rows
+nbY = size * len(cells[0]) # columns
+width = nbY
+height = nbX
+maxX = nbX - 1
+maxY = nbY - 1
 
-# Init matrix of None
-nbRows = factor * len(cells)
-nbCols = factor * len(cells[0])
-maxRow = nbRows - 1
-maxCol = nbCols - 1
-pythonList = [
-    [None for c in range(nbCols)] for r in range(nbRows)
-]
+im = Image.new("RGBA", (width, height))
+d = ImageDraw.Draw(im)
 
-def fill_cell(pythonList, cellRow, cellCol, cellValue, factor):
-    originRow = cellRow * factor
-    originCol = cellCol * factor
-    lastRow = originRow + factor
-    lastCol = originCol + factor
-    for pixelRow in range(originRow, lastRow):
-        for pixelCol in range(originCol, lastCol):
-            pythonList[pixelRow][pixelCol] = cellValue
-
-for cellRow, row in enumerate(cells):
-    for cellCol, cell in enumerate(row):
-            fill_cell(pythonList, cellRow, cellCol, cell, factor)
-
-# I want the top right colour to always be a single pixel.
-fill_cell(pythonList, 0, -1, cells[0][-2], factor)
-pythonList[0][-1] = cells[0][-1]
-
-numpyArray = np.array(pythonList)
 
