@@ -33,33 +33,73 @@ Long term objective is to publish as a module on PIP.
 1. Clone the git repository
 1. On the command line, navigate to the cloned repository
 1. Run this command:
-```
-conda env create -f environment.yml
-```
+    ```
+    $ conda env create -f environment.yml
+    ```
 
 ## To Run
-1. Read these instructions
-1. Take a quick look at the source code to see if they still make sense (sorry 😅)
-1. While you're in the source code, modify the input variables at the
-top of the file to suit what you want to run in the program (Gotcha 😎)
 1. On the command line, navigate to the cloned repository
-1. Run these commands:
+1. Activate the Anaconda environment:
     ```
-    conda activate CoulAdj-Py
-    python CoulAdj-Py.py
+    $ conda activate CoulAdj-Py
+    (CoulAdj-Py) $
     ```
+1. Run the program:
+    ```
+    (CoulAdj-Py) $ python CoulAdj-Py.py path/to/image.png path/to/results.tsv
+    ```
+
+To get the full command line usage help message:
+```
+(CoulAdj-Py) $ python CoulAdj-Py.py -h
+usage: CoulAdj-Py.py [-h] [-d] [-v] [-n] [-p] image results
+
+Computes, for each colour in the image, the list of all adjacent colours and writes the results to a TSV file.
+
+positional arguments:
+  image                 The image file to process.
+  results               The TSV file in which to write the results. 
+                        If it already exists, it will be erased and overwritten.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d, --dont-relate-diagonals
+                        if present, will only consider the 4 neighbours with a 
+                        common edge (top, bottom, left, right) to be adjacent.
+                        By default, all 8 neighbours are considered adjacent
+  -v, --verbose         displays information about the file and the computations
+  -n, --version         show program's version number and exit
+  -p, --profile         (for developers; users should use -v instead) 
+                        Prints the execution time to stderr
+                        regardless of logging level
+
+CoulAdj-Py Copyright (C) 2021 Amélia SZK. Released under GPL-3.0 License.
+```
+*(This example may not be up-to-date)*
+
+Regardless of wether or not the above example is up-to-date, these
+characteristics of the command line interface are *not* subject to change:
+* The last argument is the results file.
+* The second-to-last argument is the image file.
+* The `--dont-relate-diagonals` flag will enable the `dont-relate-diagonals` option.
+
+## Tests
+There are two tests you can run: correctness and performance.
+
+### Correctness
+
 
 
 # API
 
 ## Input 
 *   Source image file path
-*   Source image Python file object (maybe?)
+*   Destination file path
 *   Option(s)
-    * Relate Diagonals
-        * `True` by default. All 8 neighbours are considered adjacent.
-        * If `False`, only consider as adjacent the four (4) neighbours with
+    * `dont-relate-diagonals`
+        * If present, only consider as adjacent the four (4) neighbours with
         a common edge. (top, bottom, left, and right neighbours)
+        * By default, all 8 neighbours are considered adjacent.
 
 ## Known limitations
 *   (none yet)
