@@ -19,19 +19,21 @@ import numpy as np
 import argparse
 import time
 import logging
+import sys
 
 version = "0.1"
 
 # ~~~~~ Prologue ~~~~~
-
 # ~~~ Profiling ~~~
 startTime = time.perf_counter()
 
 # ~~~ Command Line Interface ~~~
 diags_flags = ("-d", "--dont-relate-diagonals")
 verbose_flags = ("-v", "--verbose")
-profile_flags = ("-p", "--profile")
 version_flags = ("-n", "--version")
+
+profile_flags = ("-p", "--profile")
+debug_flags = ("-g", "--debug")
 
 description_program = "Computes, for each colour in the image," \
     " the list of all adjacent colours and writes the results to a TSV file."
@@ -42,54 +44,66 @@ help_diags = "if present, will only consider the 4 neighbours with a common edge
     " (top, bottom, left, right) to be adjacent." \
     " By default, all 8 neighbours are considered adjacent"
 help_verbose = "displays information about the file and the computations"
-help_profile = "(for developers; users should use {} instead)" \
-    " Prints the execution time to stderr regardless of logging level".format(verbose_flags[0])
 help_img = "The image file to process."
 help_res = "The TSV file in which to write the results. " \
     "If it already exists, it will be erased and overwritten."
 
-parser = argparse.ArgumentParser(description=description_program, epilog=epilog_program)
+parser = argparse.ArgumentParser(
+    description=description_program, 
+    epilog=epilog_program,
+    exit_on_error=True) # To delegate file IOs as much as possible.
+
 parser.add_argument(*diags_flags, help=help_diags,
     action="store_true", dest="dontRelateDiagonals")
 parser.add_argument(*verbose_flags, help=help_verbose,
     action="store_true")
 parser.add_argument(*version_flags, 
     action="version", version="%(prog)s " + version)
-parser.add_argument(*profile_flags, help=help_profile,
-    action="store_true")
+
 parser.add_argument("image", help=help_img, 
     type=argparse.FileType("rb"))
 parser.add_argument("results", help=help_res, 
     type=argparse.FileType("w"))
+
+parser.add_argument(*profile_flags, help=argparse.SUPPRESS,
+    action="store_true") # Prints the execution time to stderr regardless of logging level
+parser.add_argument(*debug_flags, help=argparse.SUPPRESS,
+    action="store_true") # Sets logging level to DEBUG. Overrides --verbose
+
 args = parser.parse_args()
 
-exit()
 # ~~~ Logging ~~~
+if args.debug:
+    loglevel = logging.DEBUG
+elif args.verbose:
+    loglevel = logging.INFO
+else:
+    loglevel = logging.WARNING
 
-# # Input
+logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
 
-logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
-
+# ~~~~~ Inputs ~~~~~
 source = args.image
 destination = args.results
 relateDiagonals = not args.dontRelateDiagonals
-print(source)
-print(destination)
+logging.info("Starting")
 
-
-# # Processing
+# ~~~~~ Processing ~~~~~
 
 
 image = imageio.imread(source)
-print(image.shape)
-print(image.meta)
+height = image.shape[0]
+width = image.shape[1]
+nbChannels = image.shape[2]
+logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
 
 adjacencies = dict()
-nbRows = image.shape[0]
-nbColumns = image.shape[1]
+nbRows = height
+nbColumns = width
 maxRow = nbRows - 1
 maxColumn = nbColumns -1
-print(nbRows, nbColumns, maxRow, maxColumn)
+logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
+    .format(nbRows, nbColumns, maxRow, maxColumn))
 
 
 def process_pixel(pixelRow, pixelColumn):
@@ -136,9 +150,7 @@ for row in range(nbRows):
         process_pixel(row, column)
 
 
-# # Output
-
-
+# ~~~~~ Output ~~~~~
 COLUMN_SEPARATOR = "\t"
 
 """
@@ -179,10 +191,8 @@ def stringify():
         for neighbour in sortedNeighbours:
             sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
             
-    """
-    TSV specification say that each line must end with EOL
-    https://www.iana.org/assignments/media-types/text/tab-separated-values
-    """
+    # TSV specifications say that each line must end with EOL
+    # https://www.iana.org/assignments/media-types/text/tab-separated-values
     joinedAdjacencies = "\n".join(sortedAdjacencies)
     conformToTsvSpecifications = joinedAdjacencies + "\n"
     return conformToTsvSpecifications
@@ -191,8 +201,12 @@ stringyfied = stringify()
 
 destination.write(stringyfied)
 
-# Report execution duration
+# ~~~~~ Epilogue ~~~~~
 endTime = time.perf_counter()
 executionDuration = round(endTime - startTime, 3)
-print("{}".format(executionDuration))
+
+logging.info("Finished in {:.3} seconds".format(executionDuration))
+
+if args.profile:
+    print("{:.3}".format(executionDuration), file=sys.stderr)
 
