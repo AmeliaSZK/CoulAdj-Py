@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Customize these for your project:
-COMMAND='java -jar ./CoulAdj.jar'
+COMMAND='python ./CoulAdj-Py.py'
 SAMPLES_DIR='./tests/samples/'
 RESULTS_DIR='./tests/results/'
 GOLDEN_DIR='./tests/'
@@ -16,4 +16,4 @@ evaluate_size(){
 }
 
 evaluate_size 1
-echo "Correctness test(s) finished"
+echo "Correctness test finished"

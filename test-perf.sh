@@ -6,7 +6,7 @@
 #done
 
 # Customize these for your project:
-COMMAND='java -jar ./CoulAdj.jar'
+COMMAND='python ./CoulAdj-Py.py'
 SAMPLES_DIR='./tests/samples/'
 RESULTS_DIR='./tests/results/'
 GOLDEN_DIR='./tests/'
@@ -27,8 +27,8 @@ evaluate_size 8
 evaluate_size 16
 evaluate_size 32
 evaluate_size 64
-evaluate_size 128
-evaluate_size 256
-evaluate_size 512
-evaluate_size 1024
+#evaluate_size 128
+#evaluate_size 256
+#evaluate_size 512
+#evaluate_size 1024
 echo "Performance test(s) finished"
