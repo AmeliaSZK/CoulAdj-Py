@@ -1,34 +1,19 @@
 import imageio
 import numpy as np
+import argparse
 
+diags_help = "If present, will only consider the 4 edge neighbours to be adjacent"
+img_help = "The image file to process"
+res_help = "The TSV file where to store the results"
 
-# # Dev stuff
-# 
-# Specify where _in this repo_ the input and output files are.
-
-
-samples = {
-    "small" : "tests/small.bmp",
-    "small-alpha" : "tests/small-alpha.bmp",
-    "shadow" : "tests/proprietary/warhammer_map_1_1_shadow.bmp",
-    "vortex" : "tests/proprietary/wh2_main_great_vortex_map_6.bmp"
-}
-results = {
-    "small" : "tests/result small.tsv",
-    "small-alpha" : "tests/result small-alpha.tsv",
-    "shadow" : "tests/proprietary/result warhammer_map_1_1_shadow.tsv",
-    "vortex" : "tests/proprietary/result wh2_main_great_vortex_map_6.tsv"
-}
-
-
-# # Selection of Sample to Test
-# 
-# Choose the test to run here.
-# 
-# If you don't have the proprietary images, pick either `"small"` or `"small-alpha"`.
-# (You almost certainly don't have them)
-
-test = "small-alpha"
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--dont-relate-diagonals", help=diags_help,
+    action="store_true", dest="dontRelateDiagonals")
+parser.add_argument("image", help=img_help, 
+    type=argparse.FileType("rb"))
+parser.add_argument("results", help=res_help, 
+    type=argparse.FileType("w"))
+args = parser.parse_args()
 
 
 # # Input
@@ -38,9 +23,9 @@ test = "small-alpha"
 # (During development, specify your input in the section above.)
 
 
-source = samples[test]
-destination = results[test]
-relateDiagonals = True # Default is True
+source = args.image
+destination = args.results
+relateDiagonals = not args.dontRelateDiagonals # Default is True
 print(source)
 print(destination)
 
@@ -157,9 +142,6 @@ def stringify():
     return conformToTsvSpecifications
 
 stringyfied = stringify()
-print(stringyfied)
 
-
-with open(destination, "w") as file:
-    file.write(stringyfied)
+destination.write(stringyfied)
 
