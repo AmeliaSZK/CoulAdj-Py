@@ -1,5 +1,4 @@
-tests/Sandbox.ipynb
-tests/Formatting Sandbox.ipynb
+*.ipynb
 
 # ##### Github Template below #####
 # Byte-compiled / optimized / DLL files
