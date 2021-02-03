@@ -1,6 +1,8 @@
 import imageio
 import numpy as np
 import argparse
+import time
+import sys
 
 diags_help = "If present, will only consider the 4 edge neighbours to be adjacent"
 img_help = "The image file to process"
@@ -17,11 +19,6 @@ args = parser.parse_args()
 
 
 # # Input
-# 
-# (Don't) Write your inputs here:
-# 
-# (During development, specify your input in the section above.)
-
 
 source = args.image
 destination = args.results
@@ -31,6 +28,8 @@ print(destination)
 
 
 # # Processing
+
+startTime = time.perf_counter()
 
 image = imageio.imread(source)
 print(image.shape)
@@ -144,4 +143,9 @@ def stringify():
 stringyfied = stringify()
 
 destination.write(stringyfied)
+
+# Report execution duration
+endTime = time.perf_counter()
+executionDuration = round(endTime - startTime, 3)
+print("{}".format(executionDuration), file=sys.stderr)
 

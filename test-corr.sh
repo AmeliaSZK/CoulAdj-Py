@@ -16,4 +16,5 @@ evaluate_size(){
 }
 
 evaluate_size 1
+evaluate_size 8
 echo "Correctness test finished"
