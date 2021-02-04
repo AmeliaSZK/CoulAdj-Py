@@ -52,7 +52,7 @@ Long term objective is to publish as a module on PIP.
 To get the full command line usage help message:
 ```
 (CoulAdj-Py) $ python CoulAdj-Py.py -h
-usage: CoulAdj-Py.py [-h] [-d] [-v] [-n] [-p] image results
+usage: CoulAdj-Py.py [-h] [-d] [-v] [-n] image results
 
 Computes, for each colour in the image, the list of all adjacent colours and writes the results to a TSV file.
 
@@ -65,13 +65,10 @@ optional arguments:
   -h, --help            show this help message and exit
   -d, --dont-relate-diagonals
                         if present, will only consider the 4 neighbours with a 
-                        common edge (top, bottom, left, right) to be adjacent.
+                        common edge (top, bottom, left, right) to be adjacent. 
                         By default, all 8 neighbours are considered adjacent
-  -v, --verbose         displays information about the file and the computations
+  -v, --verbose         display informations about the file and the computations
   -n, --version         show program's version number and exit
-  -p, --profile         (for developers; users should use -v instead) 
-                        Prints the execution time to stderr
-                        regardless of logging level
 
 CoulAdj-Py Copyright (C) 2021 Amélia SZK. Released under GPL-3.0 License.
 ```
@@ -81,13 +78,88 @@ Regardless of wether or not the above example is up-to-date, these
 characteristics of the command line interface are *not* subject to change:
 * The last argument is the results file.
 * The second-to-last argument is the image file.
-* The `--dont-relate-diagonals` flag will enable the `dont-relate-diagonals` option.
+* The `--dont-relate-diagonals` flag will enable the `--dont-relate-diagonals` option.
 
-## Tests
+# Tests
 There are two tests you can run: correctness and performance.
+Run the commands from the root of the repository.
 
-### Correctness
+## Correctness
+Will run the program on small samples and report when finished.
+Will also report a failing test.
 
+
+### Good
+```
+(CoulAdj-Py) $ bash test-corr.sh
+Correctness test finished
+```
+
+### Bad
+```
+(CoulAdj-Py) $ bash test-corr.sh
+Size 1 failed
+Correctness test finished
+```
+
+## Performance
+Will run a few samples of different sizes. Check the source of `test-perf.sh`
+to see which sizes are activated. ("activated" means "not commented")
+
+Execution time of each sample will be printed.
+Failing tests will be signaled.
+Completion of all tests will also be reported.
+
+### Good
+```
+(CoulAdj-Py) $ bash test-perf.sh
+Size 128: 0.692
+Size 256: 2.73
+Performance test finished
+```
+Notice that doubling the size quadrupled the execution time.
+This is expected, because when the size doubles, the number of pixels quadruples.
+It means the implementation is O(n).
+
+Also, the size closest to the intended input is 512. 
+4 times 2.73s is 10.92s, which is a good (but not excellent) execution time.
+
+### Okay
+```
+(CoulAdj-Py) $ bash test-perf.sh
+Size 16: 0.702
+Size 32: 2.71
+Size 64: 10.9
+Size 128: 43.1
+Performance test finished
+```
+The actual performance at the time of writing these lines.
+It's definitely not good, because at these rates, the size 512 will take
+11 minutes to complete. 
+
+It is, however, not *bad*, because since execution time is still quadrupling,
+we are still in O(n).
+
+### Bad
+```
+(CoulAdj-Py) $ bash test-perf.sh
+Size 16: 0.692
+Size 32: 5.5
+Performance test finished
+```
+The implementation under test is O(n²), and the intended use-case has an `n` of 13M... 😶
+
+### Unacceptable
+```
+(CoulAdj-Py) $ bash test-perf.sh
+Size 128: 0.692
+Size 128 failed
+Size 256: 2.73
+Size 256 failed
+Performance test finished
+```
+A program can be so slow that it becomes useless, but an incorrect program
+is worse than useless. 
 
 
 # API
@@ -96,7 +168,7 @@ There are two tests you can run: correctness and performance.
 *   Source image file path
 *   Destination file path
 *   Option(s)
-    * `dont-relate-diagonals`
+    * `--dont-relate-diagonals`
         * If present, only consider as adjacent the four (4) neighbours with
         a common edge. (top, bottom, left, and right neighbours)
         * By default, all 8 neighbours are considered adjacent.
@@ -188,6 +260,3 @@ a color cannot be adjacent with itself.
     | `adj_a`   |Adjacent Alpha |
 
 *   The line-endings may be either in Windows (CRLF) or Unix (LF) style.
-
-### Python Native Object
-(To be completed)

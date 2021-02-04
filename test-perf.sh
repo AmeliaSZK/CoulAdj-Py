@@ -16,6 +16,7 @@ GOLDEN="${GOLDEN_DIR}golden.tsv"
 evaluate_size(){
     local SAMPLE="${SAMPLES_DIR}sample-size-$1.png"
     local RESULT="${RESULTS_DIR}result-size-$1.tsv"
+    echo -n "Size $1: "
     $COMMAND "$SAMPLE" "$RESULT"
     cmp --silent "$GOLDEN" "$RESULT" || echo "Size $1 failed"
 }
@@ -31,4 +32,4 @@ evaluate_size 32
 #evaluate_size 256
 #evaluate_size 512
 #evaluate_size 1024
-echo "Performance test(s) finished"
+echo "Performance test finished"

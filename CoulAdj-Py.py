@@ -43,7 +43,7 @@ epilog_program = "CoulAdj-Py  Copyright (C) 2021  Amélia SZK." \
 help_diags = "if present, will only consider the 4 neighbours with a common edge" \
     " (top, bottom, left, right) to be adjacent." \
     " By default, all 8 neighbours are considered adjacent"
-help_verbose = "displays information about the file and the computations"
+help_verbose = "display informations about the file and the computations"
 help_img = "The image file to process."
 help_res = "The TSV file in which to write the results. " \
     "If it already exists, it will be erased and overwritten."
