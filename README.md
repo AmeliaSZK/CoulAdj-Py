@@ -179,7 +179,6 @@ is worse than useless.
 
 ## Output
 *   TSV File
-*   Python native object (maybe?)
 
 ### TSV File
 *   Tab-separated values (tsv)
