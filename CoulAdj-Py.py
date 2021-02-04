@@ -1,67 +1,112 @@
+# Computes, for each colour in the image, the list of all adjacent colours.
+# Copyright (C) 2021  Amélia SZK <amelia.szk@protonmail.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import imageio
 import numpy as np
+import argparse
+import time
+import logging
+import sys
 
+version = "0.1"
 
-# # Dev stuff
-# 
-# Specify where _in this repo_ the input and output files are.
+# ~~~~~ Prologue ~~~~~
+# ~~~ Profiling ~~~
+startTime = time.perf_counter()
 
+# ~~~ Command Line Interface ~~~
+diags_flags = ("-d", "--dont-relate-diagonals")
+verbose_flags = ("-v", "--verbose")
+version_flags = ("-n", "--version")
 
-samples = {
-    "small" : "tests/small.bmp",
-    "small-alpha" : "tests/small-alpha.bmp",
-    "shadow" : "tests/proprietary/warhammer_map_1_1_shadow.bmp",
-    "vortex" : "tests/proprietary/wh2_main_great_vortex_map_6.bmp"
-}
-results = {
-    "small" : "tests/result small.tsv",
-    "small-alpha" : "tests/result small-alpha.tsv",
-    "shadow" : "tests/proprietary/result warhammer_map_1_1_shadow.tsv",
-    "vortex" : "tests/proprietary/result wh2_main_great_vortex_map_6.tsv"
-}
+profile_flags = ("-p", "--profile")
+debug_flags = ("-g", "--debug")
 
+description_program = "Computes, for each colour in the image," \
+    " the list of all adjacent colours and writes the results to a TSV file."
+epilog_program = "CoulAdj-Py  Copyright (C) 2021  Amélia SZK." \
+    "\nReleased under GPL-3.0 License."
 
-# # Selection of Sample to Test
-# 
-# Choose the test to run here.
-# 
-# If you don't have the proprietary images, pick either `"small"` or `"small-alpha"`.
-# (You almost certainly don't have them)
+help_diags = "if present, will only consider the 4 neighbours with a common edge" \
+    " (top, bottom, left, right) to be adjacent." \
+    " By default, all 8 neighbours are considered adjacent"
+help_verbose = "display informations about the file and the computations"
+help_img = "The image file to process."
+help_res = "The TSV file in which to write the results. " \
+    "If it already exists, it will be erased and overwritten."
 
-test = "small-alpha"
+parser = argparse.ArgumentParser(
+    description=description_program, 
+    epilog=epilog_program,
+    exit_on_error=True) # To delegate file IOs as much as possible.
 
+parser.add_argument(*diags_flags, help=help_diags,
+    action="store_true", dest="dontRelateDiagonals")
+parser.add_argument(*verbose_flags, help=help_verbose,
+    action="store_true")
+parser.add_argument(*version_flags, 
+    action="version", version="%(prog)s " + version)
 
-# # Input
-# 
-# (Don't) Write your inputs here:
-# 
-# (During development, specify your input in the section above.)
+parser.add_argument("image", help=help_img, 
+    type=argparse.FileType("rb"))
+parser.add_argument("results", help=help_res, 
+    type=argparse.FileType("w"))
 
+parser.add_argument(*profile_flags, help=argparse.SUPPRESS,
+    action="store_true") # Prints the execution time to stderr regardless of logging level
+parser.add_argument(*debug_flags, help=argparse.SUPPRESS,
+    action="store_true") # Sets logging level to DEBUG. Overrides --verbose
 
-source = samples[test]
-destination = results[test]
-relateDiagonals = True # Default is True
-print(source)
-print(destination)
+args = parser.parse_args()
 
+# ~~~ Logging ~~~
+if args.debug:
+    loglevel = logging.DEBUG
+elif args.verbose:
+    loglevel = logging.INFO
+else:
+    loglevel = logging.WARNING
 
-# # Processing
+logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
+
+# ~~~~~ Inputs ~~~~~
+source = args.image
+destination = args.results
+relateDiagonals = not args.dontRelateDiagonals
+logging.info("Starting")
+
+# ~~~~~ Processing ~~~~~
+
 
 image = imageio.imread(source)
-print(image.shape)
-print(image.meta)
+height = image.shape[0]
+width = image.shape[1]
+nbChannels = image.shape[2]
+logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
 
 adjacencies = dict()
-nbRows = image.shape[0]
-nbColumns = image.shape[1]
+nbRows = height
+nbColumns = width
 maxRow = nbRows - 1
 maxColumn = nbColumns -1
-print(nbRows, nbColumns, maxRow, maxColumn)
+logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
+    .format(nbRows, nbColumns, maxRow, maxColumn))
 
 
 def process_pixel(pixelRow, pixelColumn):
-    if pixelColumn == 0 and pixelRow % 10 == 0:
-        print("Now starting pixel at row {} and column {}".format(pixelRow, pixelColumn))
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
@@ -105,9 +150,7 @@ for row in range(nbRows):
         process_pixel(row, column)
 
 
-# # Output
-
-
+# ~~~~~ Output ~~~~~
 COLUMN_SEPARATOR = "\t"
 
 """
@@ -148,18 +191,22 @@ def stringify():
         for neighbour in sortedNeighbours:
             sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
             
-    """
-    TSV specification say that each line must end with EOL
-    https://www.iana.org/assignments/media-types/text/tab-separated-values
-    """
+    # TSV specifications say that each line must end with EOL
+    # https://www.iana.org/assignments/media-types/text/tab-separated-values
     joinedAdjacencies = "\n".join(sortedAdjacencies)
     conformToTsvSpecifications = joinedAdjacencies + "\n"
     return conformToTsvSpecifications
 
 stringyfied = stringify()
-print(stringyfied)
 
+destination.write(stringyfied)
 
-with open(destination, "w") as file:
-    file.write(stringyfied)
+# ~~~~~ Epilogue ~~~~~
+endTime = time.perf_counter()
+executionDuration = round(endTime - startTime, 3)
+
+logging.info("Finished in {:.3} seconds".format(executionDuration))
+
+if args.profile:
+    print("{:.3}".format(executionDuration), file=sys.stderr)
 
