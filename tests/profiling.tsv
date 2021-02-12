@@ -3,3 +3,4 @@ Base	0.700*	Baseline. All times with a * are an average of 10 measurements. Samp
 Consts	0.719*	Replaced offset literals with named constants.
 Half	0.397*	Only process forward neighbours, and register both A->B and B->A
 Sep1	0.402*	Separated corners, edge, & center. But no change to validations, so no boost expected.
+Sep2	0.382*	Removed neighbour check for center pixels.

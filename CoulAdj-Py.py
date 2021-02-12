@@ -129,12 +129,37 @@ def process_pixel(pixelRow, pixelColumn):
         #process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
         #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
 
+
+def process_pixel_with_valid_neighbours(pixelRow, pixelColumn):
+    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
+    #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
+    if relateDiagonals:
+        process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+        process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+
         
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
     neighRow = pixelRow + rowOffset
     neighColumn = pixelColumn + columnOffset
     if not valid_row_column(neighRow, neighColumn): 
         return
+    neighColour = tuple(image[neighRow, neighColumn].tolist())
+    if same_colours(pixelColour, neighColour): 
+        return
+    adjacencies.setdefault(pixelColour, set()).add(neighColour)
+    adjacencies.setdefault(neighColour, set()).add(pixelColour)
+        
+
+def process_valid_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
+    neighRow = pixelRow + rowOffset
+    neighColumn = pixelColumn + columnOffset
+    #if not valid_row_column(neighRow, neighColumn): 
+    #    return
     neighColour = tuple(image[neighRow, neighColumn].tolist())
     if same_colours(pixelColour, neighColour): 
         return
@@ -180,11 +205,32 @@ for row in range(1, nbRows - 1):
 for row in range(1, nbRows - 1):
     process_pixel(row, rigCol)
 
+# We validate all neighbours for all pixels in corners and edges because:
+#   1) In an image of N pixels, there are 4 corners and ~4√(N) pixels part of
+#       an edge, so optimizing the validations wouldn't do much anyway.
+#   2) However, optimizing the validations will add a *lot* of complexity
+#       to the code, because now you need to anticipate images of size...
+#       (W is Width and H is Height)
+#       - 1 × 1
+#       - 2 × 2
+#       - 2 × H
+#       - W × 2
+#       - 1 × H
+#       - W × 1
+#       And all the other weird cases I haven't thought of yet.
+#   3) If instead of optimizing, you keep all the checks, then you *know* that
+#       whatever the dimensions, the program will *not* try to access out-of-
+#       bound indexes.
+#
+#   Will an image of 2×4096 have worse performances than expected? Yes.
+#   Is that use-case a priority? No.
+#   Will we still output a *correct* result for a 2×4096? *Yes.*
+
 
 # ~~~ Center ~~~
 for row in range(1, nbRows - 1):
     for column in range(1, nbColumns - 1):
-        process_pixel(row, column)
+        process_pixel_with_valid_neighbours(row, column)
 
 
 # ~~~~~ Output ~~~~~
