@@ -7,3 +7,4 @@ Sep2	0.382*	Removed neighbour check for center pixels.
 Diag1	0.380*	Fixed diagonals bug. (omg... 🤦🏻‍♀️)
 Diag2	0.376*	Removed diagonals check from every pixel.
 Clean1	0.380*	Removed commented code. (no boost expected)
+Base_8	0.119*	Tested with sample size 8. No change to the code.
