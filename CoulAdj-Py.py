@@ -121,12 +121,7 @@ def process_pixel_with_diagonals(pixelRow, pixelColumn):
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-    #process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
-    #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
-    #if relateDiagonals:
-        #process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-        #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
     process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
 
 
@@ -134,12 +129,7 @@ def process_pixel_with_valid_neighbours_with_diagonals(pixelRow, pixelColumn):
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-    #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
-    #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
-    #if relateDiagonals:
-        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
 
 
@@ -147,26 +137,12 @@ def process_pixel_sans_diagonals(pixelRow, pixelColumn):
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-    #process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
-    #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
-    #if relateDiagonals:
-        #process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
-        #process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-        #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
-        #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
 
 
 def process_pixel_with_valid_neighbours_sans_diagonals(pixelRow, pixelColumn):
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-    #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
-    #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
-    #if relateDiagonals:
-        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
-        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
-        #process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
 
 
 if relateDiagonals:
