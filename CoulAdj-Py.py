@@ -244,23 +244,51 @@ for row in range(1, nbRows - 1):
 
 
 # ~~~ Center ~~~
-def encode_to_colour(a: np.ndarray) -> tuple:
+def encode_to_tuple(a: np.ndarray) -> tuple:
     return tuple(a.tolist())
 
-image_asColour = np.apply_along_axis(encode_to_colour, 2, image)
+def encode_to_uintc(colour: np.ndarray):
+    r = colour[0] << 24
+    g = colour[1] << 16
+    b = colour[2] << 8
+    a = colour[3] << 0
+    return r + g + b + a
 
-mid_pixels = image_asColour[1:maxRow-1, 1:maxColumn-1, :]
+def tuple_from_uintc(x):
+    r = (x >> 24) & 0x000000FF
+    g = (x >> 16) & 0x000000FF
+    b = (x >> 8) & 0x000000FF
+    a = (x >> 0) & 0x000000FF
+    return (r, g, b, a)
+
+#red = np.array([210, 20, 30, 246])
+#red_to_uintc = encode_to_uintc(red)
+#red_from_uintc = tuple_from_uintc(red_to_uintc)
+#print("red = {}".format(red))
+#print("red_to_uintc = {}".format(red_to_uintc))
+#print("red_from_uintc = {}".format(red_from_uintc))
+
+image_asColour = np.apply_along_axis(encode_to_uintc, 2, image)
+
+all_pixels = image_asColour[1:maxRow-1, 1:maxColumn-1]
 
 def batch_process(rowOffset, colOffset):
-    for pixelRow in range(1, nbRows - 1):
-        for pixelCol in range(1, nbColumns - 1):
-            neighRow = pixelRow + rowOffset
-            neighCol = pixelCol + colOffset
-            pixelColour = tuple(image[pixelRow, pixelCol].tolist())
-            neighColour = tuple(image[neighRow, neighCol].tolist())
-            if not same_colours(pixelColour, neighColour): 
-                adjacencies.setdefault(pixelColour, set()).add(neighColour)
-                adjacencies.setdefault(neighColour, set()).add(pixelColour)
+    firsRow = 1 + rowOffset
+    lastRow = maxRow-1 + rowOffset
+    firsCol = 1 + colOffset
+    lastCol = maxColumn-1 + colOffset
+    all_neighs = image_asColour[firsRow:lastRow, firsCol:lastCol]
+
+    diffs = all_pixels != all_neighs
+    diff_pixels = all_pixels[diffs]
+    diff_neighs = all_neighs[diffs]
+
+    for pair in zip(diff_pixels, diff_neighs):
+        pixelColour = tuple_from_uintc(pair[0])
+        neighColour = tuple_from_uintc(pair[1])
+        adjacencies.setdefault(pixelColour, set()).add(neighColour)
+        adjacencies.setdefault(neighColour, set()).add(pixelColour)
+
     return
 
 batch_process(TOP_OFFSET, RIG_OFFSET)
