@@ -116,9 +116,24 @@ rigCol = maxColumn
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
+def encode_to_uintc(colour: np.ndarray):
+    r = colour[0] << 24
+    g = colour[1] << 16
+    b = colour[2] << 8
+    a = colour[3] << 0
+    return r + g + b + a
+
+def tuple_from_uintc(x):
+    r = x >> 24 & 0x000000FF
+    g = x >> 16 & 0x000000FF
+    b = x >> 8 & 0x000000FF
+    a = x >> 0 & 0x000000FF
+    return (r, g, b, a)
+
+image_asColour = np.apply_along_axis(encode_to_uintc, 2, image)
 
 def process_pixel_with_diagonals(pixelRow, pixelColumn):
-    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
+    pixelColour = image_asColour[pixelRow, pixelColumn]
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
@@ -126,7 +141,7 @@ def process_pixel_with_diagonals(pixelRow, pixelColumn):
 
 
 def process_pixel_with_valid_neighbours_with_diagonals(pixelRow, pixelColumn):
-    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
+    pixelColour = image_asColour[pixelRow, pixelColumn]
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
@@ -134,13 +149,13 @@ def process_pixel_with_valid_neighbours_with_diagonals(pixelRow, pixelColumn):
 
 
 def process_pixel_sans_diagonals(pixelRow, pixelColumn):
-    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
+    pixelColour = image_asColour[pixelRow, pixelColumn]
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
 
 
 def process_pixel_with_valid_neighbours_sans_diagonals(pixelRow, pixelColumn):
-    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
+    pixelColour = image_asColour[pixelRow, pixelColumn]
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
     process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
 
@@ -164,8 +179,8 @@ def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffse
     neighColumn = pixelColumn + columnOffset
     if not valid_row_column(neighRow, neighColumn): 
         return
-    neighColour = tuple(image[neighRow, neighColumn].tolist())
-    if same_colours(pixelColour, neighColour): 
+    neighColour = image_asColour[neighRow, neighColumn]
+    if pixelColour == neighColour: 
         return
     adjacencies.setdefault(pixelColour, set()).add(neighColour)
     adjacencies.setdefault(neighColour, set()).add(pixelColour)
@@ -176,8 +191,8 @@ def process_valid_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, colum
     neighColumn = pixelColumn + columnOffset
     #if not valid_row_column(neighRow, neighColumn): 
     #    return
-    neighColour = tuple(image[neighRow, neighColumn].tolist())
-    if same_colours(pixelColour, neighColour): 
+    neighColour = image_asColour[neighRow, neighColumn]
+    if pixelColour == neighColour: 
         return
     adjacencies.setdefault(pixelColour, set()).add(neighColour)
     adjacencies.setdefault(neighColour, set()).add(pixelColour)
@@ -189,13 +204,13 @@ def valid_row_column(row, column):
            and row <= maxRow
            and column <= maxColumn)
 
-def same_colours(a, b):
-    if len(a) != len(b):
-        raise TypeError("Colours from the same image should have the same number of channels.")
-    for i in range(len(a)):
-        if a[i] != b[i]:
-            return False
-    return True
+#def same_colours(a, b):
+#    if len(a) != len(b):
+#        raise TypeError("Colours from the same image should have the same number of channels.")
+#    for i in range(len(a)):
+#        if a[i] != b[i]:
+#            return False
+#    return True
 
 # ~~~ Corners ~~~
 # ~ Top Left ~
@@ -244,31 +259,6 @@ for row in range(1, nbRows - 1):
 
 
 # ~~~ Center ~~~
-def encode_to_tuple(a: np.ndarray) -> tuple:
-    return tuple(a.tolist())
-
-def encode_to_uintc(colour: np.ndarray):
-    r = colour[0] << 24
-    g = colour[1] << 16
-    b = colour[2] << 8
-    a = colour[3] << 0
-    return r + g + b + a
-
-def tuple_from_uintc(x):
-    r = (x >> 24) & 0x000000FF
-    g = (x >> 16) & 0x000000FF
-    b = (x >> 8) & 0x000000FF
-    a = (x >> 0) & 0x000000FF
-    return (r, g, b, a)
-
-#red = np.array([210, 20, 30, 246])
-#red_to_uintc = encode_to_uintc(red)
-#red_from_uintc = tuple_from_uintc(red_to_uintc)
-#print("red = {}".format(red))
-#print("red_to_uintc = {}".format(red_to_uintc))
-#print("red_from_uintc = {}".format(red_from_uintc))
-
-image_asColour = np.apply_along_axis(encode_to_uintc, 2, image)
 
 all_pixels = image_asColour[1:maxRow-1, 1:maxColumn-1]
 
@@ -284,8 +274,8 @@ def batch_process(rowOffset, colOffset):
     diff_neighs = all_neighs[diffs]
 
     for pair in zip(diff_pixels, diff_neighs):
-        pixelColour = tuple_from_uintc(pair[0])
-        neighColour = tuple_from_uintc(pair[1])
+        pixelColour = pair[0]
+        neighColour = pair[1]
         adjacencies.setdefault(pixelColour, set()).add(neighColour)
         adjacencies.setdefault(neighColour, set()).add(pixelColour)
 
@@ -330,10 +320,18 @@ def stringify():
     else:
         raise TypeError("Image must have 3 or 4 channels")
     
+    adjacencies_as_tuple = dict()
+    for pixel in adjacencies.keys():
+        pixel_tuple = tuple_from_uintc(pixel)
+        adjacencies_as_tuple[pixel_tuple] = set()
+        for neigh in adjacencies[pixel]:
+            neigh_tuple = tuple_from_uintc(neigh)
+            adjacencies_as_tuple[pixel_tuple].add(neigh_tuple)
+
     sortedAdjacencies = [header]
-    sortedPixels = sorted(adjacencies.keys())
+    sortedPixels = sorted(adjacencies_as_tuple.keys())
     for pixel in sortedPixels:
-        neighboursAsSet = adjacencies[pixel]
+        neighboursAsSet = adjacencies_as_tuple[pixel]
         sortedNeighbours = sorted(list(neighboursAsSet))
         for neighbour in sortedNeighbours:
             sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
