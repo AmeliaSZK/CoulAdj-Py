@@ -1,3 +1,4 @@
 Name	Time	Desc
 Base	0.700*	Baseline. All times with a * are an average of 10 measurements. Sample size 16.
 Consts	0.719*	Replaced offset literals with named constants.
+Half	0.397*	Only process forward neighbours, and register both A->B and B->A

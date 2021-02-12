@@ -113,15 +113,15 @@ logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
 
 def process_pixel(pixelRow, pixelColumn):
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
-    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    #process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
     process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
     process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
     if relateDiagonals:
         process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
         process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
+        #process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+        #process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
 
         
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
@@ -133,6 +133,7 @@ def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffse
     if same_colours(pixelColour, neighColour): 
         return
     adjacencies.setdefault(pixelColour, set()).add(neighColour)
+    adjacencies.setdefault(neighColour, set()).add(pixelColour)
     
     
 def valid_row_column(row, column):
