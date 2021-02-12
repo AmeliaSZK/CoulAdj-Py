@@ -103,6 +103,39 @@ Correctness test finished
 ```
 
 ## Performance
+
+**NOTICE: The performance testing script is subject to a lot of
+revisions during development, so you should check its source code
+to know its actual behaviour**
+
+### Current protocol
+1. Run `(CoulAdj-Py) $ bash test-perf.sh`
+1. Copy the results in spreadsheet
+1. In spreadsheet, calculate average
+1. Round to 3 digits
+1. Report this number as the performance of this commit
+
+```
+(CoulAdj-Py) $ bash test-perf.sh
+0.691265
+0.743384
+0.741285
+0.73469
+0.705797
+0.726884
+0.686649
+0.691123
+0.74445
+0.771463
+Performance test finished
+(CoulAdj-Py) $
+```
+Average: `0.723699`
+
+Rounded: `0.724`
+
+### Probably outdated
+
 Will run a few samples of different sizes. Check the source of `test-perf.sh`
 to see which sizes are activated. ("activated" means "not commented")
 

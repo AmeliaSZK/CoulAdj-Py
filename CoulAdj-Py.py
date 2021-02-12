@@ -1,3 +1,4 @@
+# coding=utf-8
 # Computes, for each colour in the image, the list of all adjacent colours.
 # Copyright (C) 2021  Amélia SZK <amelia.szk@protonmail.com>
 
@@ -203,10 +204,10 @@ destination.write(stringyfied)
 
 # ~~~~~ Epilogue ~~~~~
 endTime = time.perf_counter()
-executionDuration = round(endTime - startTime, 3)
+executionDuration = round(endTime - startTime, 6)
 
 logging.info("Finished in {:.3} seconds".format(executionDuration))
 
 if args.profile:
-    print("{:.3}".format(executionDuration), file=sys.stderr)
+    print("{}".format(executionDuration), file=sys.stderr)
 
