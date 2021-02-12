@@ -109,6 +109,12 @@ maxRow = nbRows - 1
 maxColumn = nbColumns -1
 logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
     .format(nbRows, nbColumns, maxRow, maxColumn))
+topRow = 0
+botRow = maxRow
+lefCol = 0
+rigCol = maxColumn
+logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
+    .format(topRow, botRow, lefCol, rigCol))
 
 
 def process_pixel(pixelRow, pixelColumn):
@@ -150,9 +156,34 @@ def same_colours(a, b):
             return False
     return True
 
+# ~~~ Corners ~~~
+# ~ Top Left ~
+process_pixel(topRow, lefCol)
+# ~ Top Right ~
+process_pixel(topRow, rigCol)
+# ~ Bottom Left ~
+process_pixel(botRow, lefCol)
+# ~ Bottom Right ~
+process_pixel(botRow, rigCol)
 
-for row in range(nbRows):
-    for column in range(nbColumns):
+# ~~~ Edges ~~~
+# ~ Top ~
+for column in range(1, nbColumns - 1):
+    process_pixel(topRow, column)
+# ~ Bottom ~
+for column in range(1, nbColumns - 1):
+    process_pixel(botRow, column)
+# ~ Left ~
+for row in range(1, nbRows - 1):
+    process_pixel(row, lefCol)
+# ~ Right ~
+for row in range(1, nbRows - 1):
+    process_pixel(row, rigCol)
+
+
+# ~~~ Center ~~~
+for row in range(1, nbRows - 1):
+    for column in range(1, nbColumns - 1):
         process_pixel(row, column)
 
 
