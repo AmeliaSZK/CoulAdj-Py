@@ -8,3 +8,4 @@ Diag1	0.380*	Fixed diagonals bug. (omg... 🤦🏻‍♀️)
 Diag2	0.376*	Removed diagonals check from every pixel.
 Clean1	0.380*	Removed commented code. (no boost expected)
 Base_8	0.119*	Tested with sample size 8. No change to the code.
+Base_16	0.372*	Sample size 16. Equivalent to Clean1
