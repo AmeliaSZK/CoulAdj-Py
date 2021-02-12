@@ -83,6 +83,12 @@ else:
 
 logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
 
+# ~~~~~ Constants ~~~~~
+TOP_OFFSET = -1
+BOT_OFFSET = 1
+LEF_OFFSET = -1
+RIG_OFFSET = 1
+
 # ~~~~~ Inputs ~~~~~
 source = args.image
 destination = args.results
@@ -90,8 +96,6 @@ relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
 # ~~~~~ Processing ~~~~~
-
-
 image = imageio.imread(source)
 height = image.shape[0]
 width = image.shape[1]
@@ -109,15 +113,15 @@ logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
 
 def process_pixel(pixelRow, pixelColumn):
     pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 1)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, LEF_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
     if relateDiagonals:
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 0)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, 1)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, -1)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 0)
+        process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, LEF_OFFSET)
+        process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, 0)
 
         
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
