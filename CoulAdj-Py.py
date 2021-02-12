@@ -244,9 +244,22 @@ for row in range(1, nbRows - 1):
 
 
 # ~~~ Center ~~~
-for row in range(1, nbRows - 1):
-    for column in range(1, nbColumns - 1):
-        process_pixel_with_valid_neighbours(row, column)
+def batch_process(rowOffset, colOffset):
+    for pixelRow in range(1, nbRows - 1):
+        for pixelCol in range(1, nbColumns - 1):
+            neighRow = pixelRow + rowOffset
+            neighCol = pixelCol + colOffset
+            pixelColour = tuple(image[pixelRow, pixelCol].tolist())
+            neighColour = tuple(image[neighRow, neighCol].tolist())
+            if not same_colours(pixelColour, neighColour): 
+                adjacencies.setdefault(pixelColour, set()).add(neighColour)
+                adjacencies.setdefault(neighColour, set()).add(pixelColour)
+    return
+
+batch_process(TOP_OFFSET, RIG_OFFSET)
+batch_process(0, RIG_OFFSET)
+batch_process(BOT_OFFSET, RIG_OFFSET)
+batch_process(BOT_OFFSET, 0)
 
 
 # ~~~~~ Output ~~~~~
