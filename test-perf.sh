@@ -27,8 +27,8 @@ evaluate_size(){
 #evaluate_size 2
 #evaluate_size 4
 #evaluate_size 8
-evaluate_size 16
-#evaluate_size 32
+#evaluate_size 16
+evaluate_size 32
 #evaluate_size 64
 #evaluate_size 128
 #evaluate_size 256
