@@ -244,6 +244,13 @@ for row in range(1, nbRows - 1):
 
 
 # ~~~ Center ~~~
+def encode_to_colour(a: np.ndarray) -> tuple:
+    return tuple(a.tolist())
+
+image_asColour = np.apply_along_axis(encode_to_colour, 2, image)
+
+mid_pixels = image_asColour[1:maxRow-1, 1:maxColumn-1, :]
+
 def batch_process(rowOffset, colOffset):
     for pixelRow in range(1, nbRows - 1):
         for pixelCol in range(1, nbColumns - 1):
