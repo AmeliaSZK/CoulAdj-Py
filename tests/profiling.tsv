@@ -5,3 +5,4 @@ Half	0.397*	Only process forward neighbours, and register both A->B and B->A
 Sep1	0.402*	Separated corners, edge, & center. But no change to validations, so no boost expected.
 Sep2	0.382*	Removed neighbour check for center pixels.
 Diag1	0.380*	Fixed diagonals bug. (omg... 🤦🏻‍♀️)
+Diag2	0.376*	Removed diagonals check from every pixel.
