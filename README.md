@@ -288,65 +288,6 @@ With the example above, how you would calculate what to record in `all_sizes.tsv
 1. Write the ratio as `4.18x` so it's not mistaken for a duration
 1. I don't think it matters if you round or truncate to get from `4.184` to `4.18`
 
-### (Probably) Outdated protocol
-
-Will run a few samples of different sizes. Check the source of `test-perf.sh`
-to see which sizes are activated. ("activated" means "not commented")
-
-Execution time of each sample will be printed.
-Failing tests will be signaled.
-Completion of all tests will also be reported.
-
-### Good
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 128: 0.692
-Size 256: 2.73
-Performance test finished
-```
-Notice that doubling the size quadrupled the execution time.
-This is expected, because when the size doubles, the number of pixels quadruples.
-It means the implementation is O(n).
-
-Also, the size closest to the intended input is 512. 
-4 times 2.73s is 10.92s, which is a good (but not excellent) execution time.
-
-### Okay
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 16: 0.702
-Size 32: 2.71
-Size 64: 10.9
-Size 128: 43.1
-Performance test finished
-```
-The actual performance at the time of writing these lines.
-It's definitely not good, because at these rates, the size 512 will take
-11 minutes to complete. 
-
-It is, however, not *bad*, because since execution time is still quadrupling,
-we are still in O(n).
-
-### Bad
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 16: 0.692
-Size 32: 5.5
-Performance test finished
-```
-The implementation under test is O(n²), and the intended use-case has an `n` of 13M... 😶
-
-### Unacceptable
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 128: 0.692
-Size 128 failed
-Size 256: 2.73
-Size 256 failed
-Performance test finished
-```
-A program can be so slow that it becomes useless, but an incorrect program
-is worse than useless. 
 
 
 # API
