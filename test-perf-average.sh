@@ -1,26 +1,27 @@
 #!/usr/bin/env bash
 
-# echo "This file is only here to demonstrate how to do a loop in bash."
-#for ((i = 1 ; i <= 10 ; i++)); do
-#    ./bitmap-colour-adjacencies "$SRC" "$DST" 2> /dev/null | tail -n1
-#done
+# TEST PARAMETERS
+CLI_FLAGS='--profile'
+NB_LOOPS=10 # Usually, NB_LOOPS=10
 
-# Customize these for your project:
-COMMAND='python ./CoulAdj-Py.py --profile'
+# PROJECT PARAMETERS
+PROGRAM='python ./CoulAdj-Py.py'
 SAMPLES_DIR='./tests/samples/'
 RESULTS_DIR='./tests/results/'
 GOLDEN_DIR='./tests/'
 # (Make sure the DIR variables end with a /backslash/ )
 
-# Usually, NB_LOOPS=10
-NB_LOOPS=10
+# ~~~ END OF PARAMETERS ~~~
+
 
 GOLDEN="${GOLDEN_DIR}golden.tsv"
+COMMAND="${PROGRAM} ${CLI_FLAGS}"
+
 evaluate_size(){
     local SAMPLE="${SAMPLES_DIR}sample-size-$1.png"
     local RESULT="${RESULTS_DIR}result-size-$1.tsv"
+    echo "~~~ Size $1 ~~~"
     for ((i = 1 ; i <= $NB_LOOPS ; i++)); do
-        #echo -n "Size $1: "
         $COMMAND "$SAMPLE" "$RESULT"
     done
     cmp --silent "$GOLDEN" "$RESULT" || echo "Size $1 failed"
