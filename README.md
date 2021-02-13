@@ -81,60 +81,119 @@ characteristics of the command line interface are *not* subject to change:
 * The `--dont-relate-diagonals` flag will enable the `--dont-relate-diagonals` option.
 
 # Tests
-There are two tests you can run: correctness and performance.
-Run the commands from the root of the repository.
+There are four tests you can run: 
+* Correctness
+* Duration
+* Temporal Complexity
+* Profile of all sizes
+
+The following notes apply to all tests:
+* Run the commands from the root of the repository
+* All scripts, unless noted, verify that results are correct
+    * Failures are notified, and successes are not
+* To understand the concept of "size", refer to the 
+[test samples Readme](tests/README.md)
+    * More specifically, you need to read the `Size` section of
+    that document
+    * The sections before `Size` are a general introduction, 
+    and are probably helpful to also read.
+    * The sections after `Size` will become helpful if you need to debug 
+    incorrect results; they aren't required reading to understand the test scripts.
+* The scripts should print, at the end, instructions on how to interpret 
+and/or use the results.
+* In script results, **all durations are given in seconds**
+* Durations are printed by the program (not the test script) on stderr
+* In this Readme, the **commands are kept up-to-date**
+* In this Readme, the **results given in examples may be outdated**
+
 
 ## Correctness
-Will run the program on small samples and report when finished.
-Will also report a failing test.
+Used to make sure the program gives correct results.
+
+Will run the program on small sample sizes and report when finished.
+Will also report all failing tests.
 
 
 ### Good
 ```
-(CoulAdj-Py) $ bash test-corr.sh
-Correctness test finished
+(CoulAdj-Py) $ bash test-correctness.sh
+~~~ Testing correctness at sizes 1 and 8 ~~~
+~~~ Correctness test finished ~~~
+If no failure was reported, then all were correct.
+(CoulAdj-Py) $
 ```
 
 ### Bad
 ```
-(CoulAdj-Py) $ bash test-corr.sh
+(CoulAdj-Py) $ bash test-correctness.sh
+~~~ Testing correctness at sizes 1 and 8 ~~~
 Size 1 failed
-Correctness test finished
-```
-
-## Performance
-
-**NOTICE: The performance testing script is subject to a lot of
-revisions during development, so you should check its source code
-to know its actual behaviour**
-
-### (Probably) Current protocol
-1. Run `(CoulAdj-Py) $ bash test-perf.sh`
-1. Copy the results in spreadsheet
-1. In spreadsheet, calculate average
-1. Round to 3 digits
-1. Report this number as the performance of this commit:
-    1. Add an entry in `tests/profiling.tsv`
-    1. Include the number in the commit short message
-
-```
-(CoulAdj-Py) $ bash test-perf.sh
-0.691265
-0.743384
-0.741285
-0.73469
-0.705797
-0.726884
-0.686649
-0.691123
-0.74445
-0.771463
-Performance test finished
+Size 8 failed
+~~~ Correctness test finished ~~~
+If no failure was reported, then all were correct.
 (CoulAdj-Py) $
 ```
-Average: `0.723699`
 
-Rounded: `0.724`
+### Weird
+```
+(CoulAdj-Py) $ bash test-correctness.sh
+~~~ Testing correctness at sizes 1 and 8 ~~~
+Size 1 failed
+~~~ Correctness test finished ~~~
+If no failure was reported, then all were correct.
+(CoulAdj-Py) $
+```
+This is weird because the script says it tests sizes 1 and 8, 
+but only size 1 failed. If a size fails, all others should fail.
+
+Start by checking that the script isn't lying about the sizes under test.
+
+_(Yes, that pretty header is just a static string lol, sorry not sorry)
+(Look, designing and tuning test scripts is long, and bash is hard to 
+write and learn, okay?_ 😩 )
+
+
+## Duration
+Used to compare how useful a particular optimization was.
+
+For each size under test, will execute several runs and display the duration
+for each individual run. 
+These durations are meant to be averaged before comparing between optimizations.
+
+### Protocol
+1. Run `(CoulAdj-Py) $ bash test-duration.sh`
+1. Copy the results in a spreadsheet
+1. In the spreadsheet, calculate the average
+1. Round this average to 3 digits
+1. Report the rounded number as the performance of this commit:
+    1. Add an entry in [durations.tsv](durations.tsv)
+    1. Include the duration in the commit short message
+
+### Example
+```
+(CoulAdj-Py) $ bash test-duration.sh
+~~~ Starting performance test ~~~
+~ Size 16 ~ (10 runs)
+0.495205
+0.487364
+0.515644
+0.525737
+0.542067
+0.511323
+0.518518
+0.502498
+0.511994
+0.494947
+~~~ Performance test finished ~~~
+To calculate the performance of a size:
+  1) Average all durations for that size
+  2) Round this average to 3 digits
+  3) That's it :)
+(CoulAdj-Py) $
+```
+Average: `0.5045312`
+
+Rounded: `0.505`
 
 
 

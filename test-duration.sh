@@ -27,7 +27,7 @@ evaluate_size(){
     cmp --silent "$GOLDEN" "$RESULT" || echo "Size $1 failed"
 }
 
-echo "~~~ Starting performance test ~~~"
+echo "~~~ Starting Duration test ~~~"
 #evaluate_size 1
 #evaluate_size 2
 #evaluate_size 4
@@ -39,7 +39,7 @@ evaluate_size 16
 #evaluate_size 256
 #evaluate_size 512
 #evaluate_size 1024
-echo "~~~ Performance test finished ~~~"
+echo "~~~ Duration test finished ~~~"
 echo "To calculate the performance of a size:"
 echo "  1) Average all durations for that size"
 echo "  2) Round this average to 3 digits"
