@@ -113,7 +113,9 @@ to know its actual behaviour**
 1. Copy the results in spreadsheet
 1. In spreadsheet, calculate average
 1. Round to 3 digits
-1. Report this number as the performance of this commit
+1. Report this number as the performance of this commit:
+    1. Add an entry in `tests/profiling.tsv`
+    1. Include the number in the commit short message
 
 ```
 (CoulAdj-Py) $ bash test-perf.sh
@@ -134,7 +136,9 @@ Average: `0.723699`
 
 Rounded: `0.724`
 
-### Probably outdated
+
+
+### ~~Probably~~ outdated
 
 Will run a few samples of different sizes. Check the source of `test-perf.sh`
 to see which sizes are activated. ("activated" means "not commented")

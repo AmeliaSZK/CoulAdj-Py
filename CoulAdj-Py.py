@@ -24,7 +24,7 @@ import sys
 
 version = "0.1"
 
-# ~~~~~ Prologue ~~~~~
+# ##### PROLOGUE #####
 # ~~~ Profiling ~~~
 startTime = time.perf_counter()
 
@@ -83,19 +83,19 @@ else:
 
 logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
 
-# ~~~~~ Constants ~~~~~
+# ##### CONSTANTS #####
 TOP_OFFSET = -1
 BOT_OFFSET = 1
 LEF_OFFSET = -1
 RIG_OFFSET = 1
 
-# ~~~~~ Inputs ~~~~~
+# ##### INPUTS #####
 source = args.image
 destination = args.results
 relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
-# ~~~~~ Processing ~~~~~
+# ##### PROCESSING #####
 image = imageio.imread(source)
 height = image.shape[0]
 width = image.shape[1]
@@ -287,7 +287,7 @@ batch_process(BOT_OFFSET, RIG_OFFSET)
 batch_process(BOT_OFFSET, 0)
 
 
-# ~~~~~ Output ~~~~~
+# ##### OUTPUT #####
 COLUMN_SEPARATOR = "\t"
 
 """
@@ -346,7 +346,7 @@ stringyfied = stringify()
 
 destination.write(stringyfied)
 
-# ~~~~~ Epilogue ~~~~~
+# ##### EPILOGUE #####
 endTime = time.perf_counter()
 executionDuration = round(endTime - startTime, 6)
 
