@@ -11,7 +11,7 @@ There is currently no API version number, because there has been no public relea
 "Colour" and "color" will be used interchangeably and arbitrarily in both the code
 and documentation.
 
-Long term objective is to publish as a module on PIP.
+~~Long term objective is to publish as a module on PIP.~~
 
 # About this Github repository
 
@@ -70,7 +70,7 @@ optional arguments:
   -v, --verbose         display informations about the file and the computations
   -n, --version         show program's version number and exit
 
-CoulAdj-Py Copyright (C) 2021 Amélia SZK. Released under GPL-3.0 License.
+CoulAdj-Py Copyright (C) 2021 Amélia SZK.
 ```
 *(This example may not be up-to-date)*
 
@@ -81,85 +81,218 @@ characteristics of the command line interface are *not* subject to change:
 * The `--dont-relate-diagonals` flag will enable the `--dont-relate-diagonals` option.
 
 # Tests
-There are two tests you can run: correctness and performance.
-Run the commands from the root of the repository.
+There are four tests you can run: 
+* Correctness
+* Duration
+* Temporal Complexity
+* Profile of all sizes
+
+The following notes apply to all tests:
+* Run the commands from the root of the repository
+* All scripts, unless noted, verify that results are correct
+    * Failures are reported, and successes are not
+* To understand the concept of "size", refer to the 
+[test samples Readme](tests/README.md)
+    * More specifically, you need to read the `Size` section of
+    that document
+    * The sections before `Size` are a general introduction, 
+    and it's probably helpful to also read them.
+    * The sections after `Size` will become helpful if you need to debug 
+    incorrect results; they aren't required reading to understand the test scripts.
+* The scripts should print, at the end, instructions on how to interpret 
+and/or use the results.
+* In script results, **all durations are given in seconds**
+* Durations are printed by the program (not the test script) on stderr
+* In this Readme, the **commands are kept up-to-date**
+* In this Readme, the **results given in examples may be outdated**
+
 
 ## Correctness
-Will run the program on small samples and report when finished.
-Will also report a failing test.
+Run with `(CoulAdj-Py) $ bash test-correctness.sh`
+
+Used to quickly make sure the program gives correct results.
+
+Will run the program on small sample sizes and report when finished.
+Will also report all failing tests.
 
 
 ### Good
 ```
-(CoulAdj-Py) $ bash test-corr.sh
-Correctness test finished
+(CoulAdj-Py) $ bash test-correctness.sh
+~~~ Testing correctness at sizes 1 and 8 ~~~
+~~~ Correctness test finished ~~~
+If no failure was reported, then all were correct.
+(CoulAdj-Py) $
 ```
+No news is good news. 
+More explicitely, if the script didn't report a failure, then the script
+didn't detect a failure.
 
 ### Bad
 ```
-(CoulAdj-Py) $ bash test-corr.sh
+(CoulAdj-Py) $ bash test-correctness.sh
+~~~ Testing correctness at sizes 1 and 8 ~~~
 Size 1 failed
-Correctness test finished
+Size 8 failed
+~~~ Correctness test finished ~~~
+If no failure was reported, then all were correct.
+(CoulAdj-Py) $
+```
+Notice that the script reported failures.
+
+### Weird
+```
+(CoulAdj-Py) $ bash test-correctness.sh
+~~~ Testing correctness at sizes 1 and 8 ~~~
+Size 1 failed
+~~~ Correctness test finished ~~~
+If no failure was reported, then all were correct.
+(CoulAdj-Py) $
+```
+This is weird because the script says it tests sizes 1 and 8, 
+but only size 1 failed. 
+Because of how the test samples were created, if a size fails, all others should fail.
+
+Start by checking that the script isn't lying about the sizes under test.
+
+_(Yes, that pretty header is just a static string lol, sorry not sorry)
+(Look, designing and tuning test scripts is long, and bash is hard to 
+write and learn, okay?_ 😩 )
+
+
+## Duration
+Run with `(CoulAdj-Py) $ bash test-duration.sh`
+
+Used to compare how useful a particular optimization was.
+
+For each size under test, will execute several runs and display the duration
+for each individual run. 
+These durations are meant to be averaged before comparing between optimizations.
+
+### Protocol
+1. Run `(CoulAdj-Py) $ bash test-duration.sh`
+1. Copy the results in a spreadsheet
+1. In the spreadsheet, calculate the average
+1. Round this average to 3 digits
+1. Report the rounded number as the performance of this commit:
+    1. Add an entry in [durations.tsv](durations.tsv)
+    1. Include the duration in the commit short message
+
+### Example
+```
+(CoulAdj-Py) $ bash test-duration.sh
+~~~ Starting performance test ~~~
+~ Size 16 ~ (10 runs)
+0.495205
+0.487364
+0.515644
+0.525737
+0.542067
+0.511323
+0.518518
+0.502498
+0.511994
+0.494947
+~~~ Performance test finished ~~~
+To calculate the performance of a size:
+  1) Average all durations for that size
+  2) Round this average to 3 digits
+  3) That's it :)
+(CoulAdj-Py) $
+```
+Average: `0.5045312`
+
+Rounded: `0.505`
+
+## Temporal Complexity
+Run with `(CoulAdj-Py) $ bash test-temporal-complexity.sh`
+
+Used to quickly evaluate the temporal complexity (Big O) of the program.
+
+Will test a few small consecutive sizes, with only one run per size.
+
+* **The program should be `O(n)`**
+* If you have more than that, bring it down to O(n) before profiling all sizes
+* If you have less, I expect one of these to be true:
+    * The test script(s) and/or program is very broken 😶
+    * You're a genius, please please please tell me how you did it 👀 🎉
+* **At `O(n)`, each size takes about 4 times longer than the previous size**
+
+```
+(CoulAdj-Py) $ bash test-temporal-complexity.sh
+~~~ Profiling Sizes 8 to 64 ~~~
+Expect 6~12 seconds to do size 64
+Size 8: 0.150215
+Size 16: 0.503862
+Size 32: 1.969428
+Size 64: 7.50256
+~~~ Temporal complexity test finished ~~~
+At O(n), each size takes ~4x longer than the previous.
+Actual ratios have ranged from 3.4x to 4.2x
+(CoulAdj-Py) $ 
 ```
 
-## Performance
-Will run a few samples of different sizes. Check the source of `test-perf.sh`
-to see which sizes are activated. ("activated" means "not commented")
+## Profile of All Sizes
+Run with `(CoulAdj-Py) $ bash profile-all-sizes.sh`
 
-Execution time of each sample will be printed.
-Failing tests will be signaled.
-Completion of all tests will also be reported.
+Used to compare performance between milestones in the project, or between
+different implementations of CoulAdj.
 
-### Good
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 128: 0.692
-Size 256: 2.73
-Performance test finished
-```
-Notice that doubling the size quadrupled the execution time.
-This is expected, because when the size doubles, the number of pixels quadruples.
-It means the implementation is O(n).
+Before running this script, make sure your temporal complexity is less than
+or equal to `O(n)`.
 
-Also, the size closest to the intended input is 512. 
-4 times 2.73s is 10.92s, which is a good (but not excellent) execution time.
+Works like the Temporal Complexity test, but on a much wider range of sizes.
 
-### Okay
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 16: 0.702
-Size 32: 2.71
-Size 64: 10.9
-Size 128: 43.1
-Performance test finished
-```
-The actual performance at the time of writing these lines.
-It's definitely not good, because at these rates, the size 512 will take
-11 minutes to complete. 
+Write your results in [all_sizes.tsv](all_sizes.tsv).
 
-It is, however, not *bad*, because since execution time is still quadrupling,
-we are still in O(n).
+### Protocol
+1. Run `(CoulAdj-Py) $ bash profile-all-sizes.sh`
+1. Follow instructions
 
-### Bad
-```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 16: 0.692
-Size 32: 5.5
-Performance test finished
-```
-The implementation under test is O(n²), and the intended use-case has an `n` of 13M... 😶
+The protocol is kept short because:
+1. Formally documenting it would be long tedious
+1. I'm not sure a full documentation would be useful
+1. The test protocols are still subject to changes, and keeping the Readme
+updated is always so, so long
+1. This particular script was created because I thought that 
+"surely it's gonna be useful", not because I saw an actual and immediate need
+1. For real, it's just the Temporal Complexity with more sizes and a dedicated
+TSV file to keep track of the results. (And a supporting spreadsheet... 😅)
 
-### Unacceptable
+### Example
 ```
-(CoulAdj-Py) $ bash test-perf.sh
-Size 128: 0.692
-Size 128 failed
-Size 256: 2.73
-Size 256 failed
-Performance test finished
+(CoulAdj-Py) $ bash profile-all-sizes.sh
+~~~ Profiling Sizes 1 to 512 ~~~
+Expect up to 6~12 minutes in total. (It's 10~11 on my machine)
+Each size should take ~4x longer than the previous.
+Size 1: 0.036352
+Size 2: 0.041543
+Size 4: 0.06418
+Size 8: 0.154275
+Size 16: 0.485168
+Size 32: 1.921757
+Size 64: 7.962166
+Size 128: 32.105543
+Size 256: 125.074073
+Size 512: 523.067901
+~~~ Profiling of all sizes finished ~~~
+Truncate durations to 4 digits before calculating & recording ratios.
+  "Truncate to 4 digits" will give you 5 chars bc of the decimal point.
+  "Recording ratios" means to write them in all_sizes.tsv
+(CoulAdj-Py) $
 ```
-A program can be so slow that it becomes useless, but an incorrect program
-is worse than useless. 
+
+### Calculation example
+With the example above, this is how you would calculate what to record in `all_sizes.tsv`:
+1. Duration of size 256 is `125.074073`
+1. Duration of size 512 is `523.067901`
+1. Recorded duration of 256 is `125.0`
+1. Recorded duration of 512 is `523.0`
+1. `523.0` divided by `125.0` equals `4.184`
+1. Recorded ratio for 512 is `4.18`
+1. Write the ratio as `4.18x` so it's not mistaken for a duration
+1. I don't think it matters if you round or truncate to get from `4.184` to `4.18`
+
 
 
 # API

@@ -1,3 +1,4 @@
+# coding=utf-8
 # Computes, for each colour in the image, the list of all adjacent colours.
 # Copyright (C) 2021  Amélia SZK <amelia.szk@protonmail.com>
 
@@ -23,7 +24,7 @@ import sys
 
 version = "0.1"
 
-# ~~~~~ Prologue ~~~~~
+# ##### PROLOGUE #####
 # ~~~ Profiling ~~~
 startTime = time.perf_counter()
 
@@ -37,8 +38,7 @@ debug_flags = ("-g", "--debug")
 
 description_program = "Computes, for each colour in the image," \
     " the list of all adjacent colours and writes the results to a TSV file."
-epilog_program = "CoulAdj-Py  Copyright (C) 2021  Amélia SZK." \
-    "\nReleased under GPL-3.0 License."
+epilog_program = "CoulAdj-Py  Copyright (C) 2021  Amélia SZK."
 
 help_diags = "if present, will only consider the 4 neighbours with a common edge" \
     " (top, bottom, left, right) to be adjacent." \
@@ -82,15 +82,19 @@ else:
 
 logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
 
-# ~~~~~ Inputs ~~~~~
+# ##### CONSTANTS #####
+TOP_OFFSET = -1
+BOT_OFFSET = 1
+LEF_OFFSET = -1
+RIG_OFFSET = 1
+
+# ##### INPUTS #####
 source = args.image
 destination = args.results
 relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
-# ~~~~~ Processing ~~~~~
-
-
+# ##### PROCESSING #####
 image = imageio.imread(source)
 height = image.shape[0]
 width = image.shape[1]
@@ -104,30 +108,93 @@ maxRow = nbRows - 1
 maxColumn = nbColumns -1
 logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
     .format(nbRows, nbColumns, maxRow, maxColumn))
+topRow = 0
+botRow = maxRow
+lefCol = 0
+rigCol = maxColumn
+logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
+    .format(topRow, botRow, lefCol, rigCol))
+
+def encode_to_uintc(colour: np.ndarray):
+    r = colour[0] << 24
+    g = colour[1] << 16
+    b = colour[2] << 8
+    a = colour[3] << 0
+    return r + g + b + a
+
+def tuple_from_uintc(x):
+    r = x >> 24 & 0x000000FF
+    g = x >> 16 & 0x000000FF
+    b = x >> 8 & 0x000000FF
+    a = x >> 0 & 0x000000FF
+    return (r, g, b, a)
+
+image_asColour = np.apply_along_axis(encode_to_uintc, 2, image)
+
+def process_pixel_with_diagonals(pixelRow, pixelColumn):
+    pixelColour = image_asColour[pixelRow, pixelColumn]
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
 
 
-def process_pixel(pixelRow, pixelColumn):
-    pixelColour = tuple(image[pixelRow, pixelColumn].tolist())
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, -1)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 1)
-    if relateDiagonals:
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 1, 0)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, 1)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, 0, -1)
-        process_neighbour(pixelColour, pixelRow, pixelColumn, -1, 0)
+def process_pixel_with_valid_neighbours_with_diagonals(pixelRow, pixelColumn):
+    pixelColour = image_asColour[pixelRow, pixelColumn]
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
 
-        
+
+def process_pixel_sans_diagonals(pixelRow, pixelColumn):
+    pixelColour = image_asColour[pixelRow, pixelColumn]
+    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+
+
+def process_pixel_with_valid_neighbours_sans_diagonals(pixelRow, pixelColumn):
+    pixelColour = image_asColour[pixelRow, pixelColumn]
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
+    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+
+
+if relateDiagonals:
+    process_pixel = process_pixel_with_diagonals
+else:
+    process_pixel = process_pixel_sans_diagonals
+
+if relateDiagonals:
+    process_pixel_with_valid_neighbours = process_pixel_with_valid_neighbours_with_diagonals
+else:
+    process_pixel_with_valid_neighbours = process_pixel_with_valid_neighbours_sans_diagonals
+# Yes, I tried writing these function assignations with both the ternary 
+#   operator and only one if-else. And both were hecking eyesores imo.
+#   (The problem is probably with the length of the function names...)
+
+
 def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
     neighRow = pixelRow + rowOffset
     neighColumn = pixelColumn + columnOffset
     if not valid_row_column(neighRow, neighColumn): 
         return
-    neighColour = tuple(image[neighRow, neighColumn].tolist())
-    if same_colours(pixelColour, neighColour): 
+    neighColour = image_asColour[neighRow, neighColumn]
+    if pixelColour == neighColour: 
         return
     adjacencies.setdefault(pixelColour, set()).add(neighColour)
+    adjacencies.setdefault(neighColour, set()).add(pixelColour)
+        
+
+def process_valid_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
+    neighRow = pixelRow + rowOffset
+    neighColumn = pixelColumn + columnOffset
+    #if not valid_row_column(neighRow, neighColumn): 
+    #    return
+    neighColour = image_asColour[neighRow, neighColumn]
+    if pixelColour == neighColour: 
+        return
+    adjacencies.setdefault(pixelColour, set()).add(neighColour)
+    adjacencies.setdefault(neighColour, set()).add(pixelColour)
     
     
 def valid_row_column(row, column):
@@ -136,21 +203,90 @@ def valid_row_column(row, column):
            and row <= maxRow
            and column <= maxColumn)
 
-def same_colours(a, b):
-    if len(a) != len(b):
-        raise TypeError("Colours from the same image should have the same number of channels.")
-    for i in range(len(a)):
-        if a[i] != b[i]:
-            return False
-    return True
+#def same_colours(a, b):
+#    if len(a) != len(b):
+#        raise TypeError("Colours from the same image should have the same number of channels.")
+#    for i in range(len(a)):
+#        if a[i] != b[i]:
+#            return False
+#    return True
+
+# ~~~ Corners ~~~
+# ~ Top Left ~
+process_pixel(topRow, lefCol)
+# ~ Top Right ~
+process_pixel(topRow, rigCol)
+# ~ Bottom Left ~
+process_pixel(botRow, lefCol)
+# ~ Bottom Right ~
+process_pixel(botRow, rigCol)
+
+# ~~~ Edges ~~~
+# ~ Top ~
+for column in range(1, nbColumns - 1):
+    process_pixel(topRow, column)
+# ~ Bottom ~
+for column in range(1, nbColumns - 1):
+    process_pixel(botRow, column)
+# ~ Left ~
+for row in range(1, nbRows - 1):
+    process_pixel(row, lefCol)
+# ~ Right ~
+for row in range(1, nbRows - 1):
+    process_pixel(row, rigCol)
+
+# We validate all neighbours for all pixels in corners and edges because:
+#   1) In an image of N pixels, there are 4 corners and ~4√(N) pixels part of
+#       an edge, so optimizing the validations wouldn't do much anyway.
+#   2) However, optimizing the validations will add a *lot* of complexity
+#       to the code, because now you need to anticipate images of size...
+#       (W is Width and H is Height)
+#       - 1 × 1
+#       - 2 × 2
+#       - 2 × H
+#       - W × 2
+#       - 1 × H
+#       - W × 1
+#       And all the other weird cases I haven't thought of yet.
+#   3) If instead of optimizing, you keep all the checks, then you *know* that
+#       whatever the dimensions, the program will *not* try to access out-of-
+#       bound indexes.
+#
+#   Will an image of 2×4096 have worse performances than expected? Yes.
+#   Is that use-case a priority? No.
+#   Will we still output a *correct* result for a 2×4096? *Yes.*
 
 
-for row in range(nbRows):
-    for column in range(nbColumns):
-        process_pixel(row, column)
+# ~~~ Center ~~~
+
+all_pixels = image_asColour[1:maxRow-1, 1:maxColumn-1]
+
+def batch_process(rowOffset, colOffset):
+    firsRow = 1 + rowOffset
+    lastRow = maxRow-1 + rowOffset
+    firsCol = 1 + colOffset
+    lastCol = maxColumn-1 + colOffset
+    all_neighs = image_asColour[firsRow:lastRow, firsCol:lastCol]
+
+    diffs = all_pixels != all_neighs
+    diff_pixels = all_pixels[diffs]
+    diff_neighs = all_neighs[diffs]
+
+    for pair in zip(diff_pixels, diff_neighs):
+        pixelColour = pair[0]
+        neighColour = pair[1]
+        adjacencies.setdefault(pixelColour, set()).add(neighColour)
+        adjacencies.setdefault(neighColour, set()).add(pixelColour)
+
+    return
+
+batch_process(TOP_OFFSET, RIG_OFFSET)
+batch_process(0, RIG_OFFSET)
+batch_process(BOT_OFFSET, RIG_OFFSET)
+batch_process(BOT_OFFSET, 0)
 
 
-# ~~~~~ Output ~~~~~
+# ##### OUTPUT #####
 COLUMN_SEPARATOR = "\t"
 
 """
@@ -183,10 +319,18 @@ def stringify():
     else:
         raise TypeError("Image must have 3 or 4 channels")
     
+    adjacencies_as_tuple = dict()
+    for pixel in adjacencies.keys():
+        pixel_tuple = tuple_from_uintc(pixel)
+        adjacencies_as_tuple[pixel_tuple] = set()
+        for neigh in adjacencies[pixel]:
+            neigh_tuple = tuple_from_uintc(neigh)
+            adjacencies_as_tuple[pixel_tuple].add(neigh_tuple)
+
     sortedAdjacencies = [header]
-    sortedPixels = sorted(adjacencies.keys())
+    sortedPixels = sorted(adjacencies_as_tuple.keys())
     for pixel in sortedPixels:
-        neighboursAsSet = adjacencies[pixel]
+        neighboursAsSet = adjacencies_as_tuple[pixel]
         sortedNeighbours = sorted(list(neighboursAsSet))
         for neighbour in sortedNeighbours:
             sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
@@ -201,12 +345,12 @@ stringyfied = stringify()
 
 destination.write(stringyfied)
 
-# ~~~~~ Epilogue ~~~~~
+# ##### EPILOGUE #####
 endTime = time.perf_counter()
-executionDuration = round(endTime - startTime, 3)
+executionDuration = round(endTime - startTime, 6)
 
 logging.info("Finished in {:.3} seconds".format(executionDuration))
 
 if args.profile:
-    print("{:.3}".format(executionDuration), file=sys.stderr)
+    print("{}".format(executionDuration), file=sys.stderr)
 

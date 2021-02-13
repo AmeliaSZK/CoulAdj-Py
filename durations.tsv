@@ -1,0 +1,15 @@
+Name	Time	Desc
+Base	0.700*	Baseline. All times with a * are an average of 10 measurements. Sample size 16.
+Consts	0.719*	Replaced offset literals with named constants.
+Half	0.397*	Only process forward neighbours, and register both A->B and B->A
+Sep1	0.402*	Separated corners, edge, & center. But no change to validations, so no boost expected.
+Sep2	0.382*	Removed neighbour check for center pixels.
+Diag1	0.380*	Fixed diagonals bug. (omg... 🤦🏻‍♀️)
+Diag2	0.376*	Removed diagonals check from every pixel.
+Clean1	0.380*	Removed commented code. (no boost expected)
+Base_8	0.119*	Tested with sample size 8. No change to the code.
+Base_16	0.372*	Sample size 16. Equivalent to Clean1
+Base_32	1.399*	Sample size 32.
+Base_64	5.527*	Sample size 64.
+Clean1b	0.376*	Reverted test script to Clean1
+Numpy1	0.505*	Used proper Numpy functions to process. Probably not at Numpy's limit yet.
