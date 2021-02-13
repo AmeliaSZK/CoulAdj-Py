@@ -108,7 +108,7 @@ Correctness test finished
 revisions during development, so you should check its source code
 to know its actual behaviour**
 
-### Current protocol
+### (Probably) Current protocol
 1. Run `(CoulAdj-Py) $ bash test-perf.sh`
 1. Copy the results in spreadsheet
 1. In spreadsheet, calculate average
@@ -138,7 +138,7 @@ Rounded: `0.724`
 
 
 
-### ~~Probably~~ outdated
+### (Probably) Outdated protocol
 
 Will run a few samples of different sizes. Check the source of `test-perf.sh`
 to see which sizes are activated. ("activated" means "not commented")
