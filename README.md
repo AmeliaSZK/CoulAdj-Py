@@ -108,7 +108,9 @@ and/or use the results.
 
 
 ## Correctness
-Used to make sure the program gives correct results.
+Run with `(CoulAdj-Py) $ bash test-correctness.sh`
+
+Used to quickly make sure the program gives correct results.
 
 Will run the program on small sample sizes and report when finished.
 Will also report all failing tests.
@@ -154,6 +156,8 @@ write and learn, okay?_ 😩 )
 
 
 ## Duration
+Run with `(CoulAdj-Py) $ bash test-duration.sh`
+
 Used to compare how useful a particular optimization was.
 
 For each size under test, will execute several runs and display the duration
@@ -195,7 +199,94 @@ Average: `0.5045312`
 
 Rounded: `0.505`
 
+## Temporal Complexity
+Run with `(CoulAdj-Py) $ bash test-temporal-complexity.sh`
 
+Used to quickly evaluate the temporal complexity (Big O) of the program.
+
+Will test a few small consecutive sizes, with only one run per size.
+
+* **The program should be `O(n)`**
+* If you have more than that, bring it down to O(n) before profiling all sizes
+* If you have less, I expect one of these to be true:
+    * The test script(s) and/or program is very broken 😶
+    * You're a genius, please please please tell me how you did it 👀 🎉
+* **At `O(n)`, each size takes about 4 times longer than the previous size**
+
+```
+(CoulAdj-Py) $ bash test-temporal-complexity.sh
+~~~ Profiling Sizes 8 to 64 ~~~
+Expect 6~12 seconds to do size 64
+Size 8: 0.150215
+Size 16: 0.503862
+Size 32: 1.969428
+Size 64: 7.50256
+~~~ Temporal complexity test finished ~~~
+At O(n), each size takes ~4x longer than the previous.
+Actual ratios have ranged from 3.4x to 4.2x
+(CoulAdj-Py) $ 
+```
+
+## Profile of All Sizes
+Run with `(CoulAdj-Py) $ bash profile-all-sizes.sh`
+
+Used to compare performance between milestones in the project, or between
+different implementations of CoulAdj.
+
+Before running this script, make sure your temporal complexity is less than
+or equal to `O(n)`.
+
+Works like the Temporal Complexity test, but on a much wider range of sizes.
+
+Write your results in [all_sizes.tsv](all_sizes.tsv).
+
+### Protocol
+1. Run `(CoulAdj-Py) $ bash profile-all-sizes.sh`
+1. Follow instructions
+
+The protocol is kept short because:
+1. Formally documenting it would be long tedious
+1. I'm not sure a full documentation would be useful
+1. The test protocols are still subject to changes, and keeping the Readme
+updated is always so, so long
+1. This particular script was created because I thought that 
+"surely it's gonna be useful", not because I saw an actual and immediate need
+1. For real, it's just the Temporal Complexity with more sizes and a dedicated
+TSV file to keep track of the results. (And a supporting spreadsheet... 😅)
+
+### Example
+```
+(CoulAdj-Py) $ bash profile-all-sizes.sh
+~~~ Profiling Sizes 1 to 512 ~~~
+Expect up to 6~12 minutes in total. (It's 10~11 on my machine)
+Each size should take ~4x longer than the previous.
+Size 1: 0.036352
+Size 2: 0.041543
+Size 4: 0.06418
+Size 8: 0.154275
+Size 16: 0.485168
+Size 32: 1.921757
+Size 64: 7.962166
+Size 128: 32.105543
+Size 256: 125.074073
+Size 512: 523.067901
+~~~ Profiling of all sizes finished ~~~
+Truncate durations to 4 digits before calculating & recording ratios.
+  "Truncate to 4 digits" will give you 5 chars bc of the decimal point.
+  "Recording ratios" means to write them in all_sizes.tsv
+(CoulAdj-Py) $
+```
+
+### Calculation example
+With the example above, how you would calculate what to record in `all_sizes.tsv`:
+1. Duration of size 256 is `125.074073`
+1. Duration of size 512 is `523.067901`
+1. Recorded duration of 256 is `125.0`
+1. Recorded duration of 512 is `523.0`
+1. `523.0` divided by `125.0` equals `4.184`
+1. Recorded ratio for 512 is `4.18`
+1. Write the ratio as `4.18x` so it's not mistaken for a duration
+1. I don't think it matters if you round or truncate to get from `4.184` to `4.18`
 
 ### (Probably) Outdated protocol
 
