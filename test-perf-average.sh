@@ -20,13 +20,14 @@ COMMAND="${PROGRAM} ${CLI_FLAGS}"
 evaluate_size(){
     local SAMPLE="${SAMPLES_DIR}sample-size-$1.png"
     local RESULT="${RESULTS_DIR}result-size-$1.tsv"
-    echo "~~~ Size $1 ~~~"
+    echo "~ Size $1 ~ ($NB_LOOPS runs)"
     for ((i = 1 ; i <= $NB_LOOPS ; i++)); do
         $COMMAND "$SAMPLE" "$RESULT"
     done
     cmp --silent "$GOLDEN" "$RESULT" || echo "Size $1 failed"
 }
 
+echo "~~~ Starting performance test ~~~"
 #evaluate_size 1
 #evaluate_size 2
 #evaluate_size 4
@@ -38,4 +39,8 @@ evaluate_size 16
 #evaluate_size 256
 #evaluate_size 512
 #evaluate_size 1024
-echo "Performance test finished"
+echo "~~~ Performance test finished ~~~"
+echo "To calculate the performance of a size:"
+echo "  1) Average all durations for that size"
+echo "  2) Round this average to 3 digits"
+echo "  3) That's it :)"
