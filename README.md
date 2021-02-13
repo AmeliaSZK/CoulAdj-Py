@@ -11,7 +11,7 @@ There is currently no API version number, because there has been no public relea
 "Colour" and "color" will be used interchangeably and arbitrarily in both the code
 and documentation.
 
-Long term objective is to publish as a module on PIP.
+~~Long term objective is to publish as a module on PIP.~~
 
 # About this Github repository
 
@@ -70,7 +70,7 @@ optional arguments:
   -v, --verbose         display informations about the file and the computations
   -n, --version         show program's version number and exit
 
-CoulAdj-Py Copyright (C) 2021 Amélia SZK. Released under GPL-3.0 License.
+CoulAdj-Py Copyright (C) 2021 Amélia SZK.
 ```
 *(This example may not be up-to-date)*
 
@@ -90,13 +90,13 @@ There are four tests you can run:
 The following notes apply to all tests:
 * Run the commands from the root of the repository
 * All scripts, unless noted, verify that results are correct
-    * Failures are notified, and successes are not
+    * Failures are reported, and successes are not
 * To understand the concept of "size", refer to the 
 [test samples Readme](tests/README.md)
     * More specifically, you need to read the `Size` section of
     that document
     * The sections before `Size` are a general introduction, 
-    and are probably helpful to also read.
+    and it's probably helpful to also read them.
     * The sections after `Size` will become helpful if you need to debug 
     incorrect results; they aren't required reading to understand the test scripts.
 * The scripts should print, at the end, instructions on how to interpret 
@@ -124,6 +124,9 @@ Will also report all failing tests.
 If no failure was reported, then all were correct.
 (CoulAdj-Py) $
 ```
+No news is good news. 
+More explicitely, if the script didn't report a failure, then the script
+didn't detect a failure.
 
 ### Bad
 ```
@@ -135,6 +138,7 @@ Size 8 failed
 If no failure was reported, then all were correct.
 (CoulAdj-Py) $
 ```
+Notice that the script reported failures.
 
 ### Weird
 ```
@@ -146,7 +150,8 @@ If no failure was reported, then all were correct.
 (CoulAdj-Py) $
 ```
 This is weird because the script says it tests sizes 1 and 8, 
-but only size 1 failed. If a size fails, all others should fail.
+but only size 1 failed. 
+Because of how the test samples were created, if a size fails, all others should fail.
 
 Start by checking that the script isn't lying about the sizes under test.
 
@@ -278,7 +283,7 @@ Truncate durations to 4 digits before calculating & recording ratios.
 ```
 
 ### Calculation example
-With the example above, how you would calculate what to record in `all_sizes.tsv`:
+With the example above, this is how you would calculate what to record in `all_sizes.tsv`:
 1. Duration of size 256 is `125.074073`
 1. Duration of size 512 is `523.067901`
 1. Recorded duration of 256 is `125.0`

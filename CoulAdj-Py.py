@@ -38,8 +38,7 @@ debug_flags = ("-g", "--debug")
 
 description_program = "Computes, for each colour in the image," \
     " the list of all adjacent colours and writes the results to a TSV file."
-epilog_program = "CoulAdj-Py  Copyright (C) 2021  Amélia SZK." \
-    "\nReleased under GPL-3.0 License."
+epilog_program = "CoulAdj-Py  Copyright (C) 2021  Amélia SZK."
 
 help_diags = "if present, will only consider the 4 neighbours with a common edge" \
     " (top, bottom, left, right) to be adjacent." \
