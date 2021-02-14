@@ -211,6 +211,7 @@ source_image = imageio.imread(source)
 height = source_image.shape[0]
 width = source_image.shape[1]
 nbChannels = source_image.shape[2]
+logging.debug("source_image.shape = {}".format(source_image.shape))
 logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
 
 nbRows = height
@@ -226,9 +227,12 @@ rigCol = maxCol
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
-logging.debug("source_image.shape = {}".format(source_image.shape))
+start_apply = time.perf_counter()
 image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
+end_apply = time.perf_counter()
+duration_apply = round(end_apply - start_apply, 3)
 logging.debug("image.shape = {}".format(image.shape))
+logging.debug(f"Time spent converting the array: {duration_apply}s")
 
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
