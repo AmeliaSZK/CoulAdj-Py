@@ -155,11 +155,18 @@ RIG_OFFSET = 1
 #       but as I am writing these lines, the new outline has not been 
 #       implemented yet so things will probably evolve.)
 
-def uintc_from_pixelData(pixelData: np.ndarray):
+def uintc_from_pixelData_rgbalpha(pixelData: np.ndarray):
     r = pixelData[0] << 24
     g = pixelData[1] << 16
     b = pixelData[2] << 8
     a = pixelData[3] << 0
+    return r + g + b + a
+
+def uintc_from_pixelData_rgb(pixelData: np.ndarray):
+    r = pixelData[0] << 24
+    g = pixelData[1] << 16
+    b = pixelData[2] << 8
+    a = 255
     return r + g + b + a
 
 def RGBA_from_uintc(x):
@@ -170,7 +177,7 @@ def RGBA_from_uintc(x):
     return (r, g, b, a)
 
 def colourKey_from_pixelData(pixelData: np.ndarray):
-    return uintc_from_pixelData(pixelData)
+    return uintc_from_pixelData_rgbalpha(pixelData)
 
 # ~~~ BOUNDARY ~~~
 def RGBA_from_colourKey(colourKey):
@@ -213,6 +220,13 @@ width = source_image.shape[1]
 nbChannels = source_image.shape[2]
 logging.debug("source_image.shape = {}".format(source_image.shape))
 logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
+
+if nbChannels == 3:
+    colourKey_from_pixelData = uintc_from_pixelData_rgb
+elif nbChannels == 4:
+    colourKey_from_pixelData = uintc_from_pixelData_rgbalpha
+else:
+    raise TypeError("Image must have 3 or 4 channels")
 
 nbRows = height
 nbCols = width
@@ -315,15 +329,7 @@ HEADERS = {
 }
 
 def stringify(sorted_adjacencies):
-    #nbChannels = image.shape[2]
-    HARDCODED_RGBALPHA = 4
-    nbChannels = HARDCODED_RGBALPHA
-    if nbChannels == 3:
-        header = HEADERS["RGB"]
-    elif nbChannels == 4:
-        header = HEADERS["RGB_ALPHA"]
-    else:
-        raise TypeError("Image must have 3 or 4 channels")
+    header = HEADERS["RGB_ALPHA"]
     
     all_lines = list()
     all_lines.append(header)
