@@ -281,7 +281,7 @@ def batch_process(all_pixels, rowOffset, colOffset):
 
     return
 
-all_pixels = image[1:maxRow-1, 1:maxColumn-1]
+all_pixels = image[1:-2, 1:-2]
 
 batch_process(all_pixels, BOT_OFFSET, 0)
 batch_process(all_pixels, 0, RIG_OFFSET)
