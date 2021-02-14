@@ -214,15 +214,15 @@ nbChannels = source_image.shape[2]
 logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
 
 nbRows = height
-nbColumns = width
+nbCols = width
 maxRow = nbRows - 1
-maxColumn = nbColumns -1
+maxCol = nbCols -1
 logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
-    .format(nbRows, nbColumns, maxRow, maxColumn))
+    .format(nbRows, nbCols, maxRow, maxCol))
 topRow = 0
 botRow = maxRow
 lefCol = 0
-rigCol = maxColumn
+rigCol = maxCol
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
@@ -234,9 +234,6 @@ logging.debug("image.shape = {}".format(image.shape))
 adjacencies = dict()
 
 def batch_process2(all_pixels, all_neighs):
-    logging.debug("all_pixels.shape = {}".format(all_pixels.shape))
-    logging.debug("all_neighs.shape = {}".format(all_neighs.shape))
-
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
@@ -256,9 +253,6 @@ def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, co
     lastCol = maxColumn-1 + colOffset
     all_neighs = img[firsRow:lastRow, firsCol:lastCol]
 
-    logging.debug("all_pixels.shape = {}".format(all_pixels.shape))
-    logging.debug("all_neighs.shape = {}".format(all_neighs.shape))
-
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
@@ -271,17 +265,17 @@ def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, co
 
     return
 
-bot_pixels = image[topRow:botRow-1, lefCol:rigCol]
-bot_neighs = image[topRow+1:botRow, lefCol:rigCol]
+bot_pixels = image[topRow:nbRows-1, lefCol:nbCols]
+bot_neighs = image[topRow+1:nbRows, lefCol:nbCols]
 
-rig_pixels = image[topRow:botRow, lefCol:rigCol-1]
-rig_neighs = image[topRow:botRow, lefCol+1:rigCol]
+rig_pixels = image[topRow:nbRows, lefCol:nbCols-1]
+rig_neighs = image[topRow:nbRows, lefCol+1:nbCols]
 
-bot_rig_pixels = image[topRow:botRow-1, lefCol:rigCol-1]
-bot_rig_neighs = image[topRow+1:botRow, lefCol+1:rigCol]
+bot_rig_pixels = image[topRow:nbRows-1, lefCol:nbCols-1]
+bot_rig_neighs = image[topRow+1:nbRows, lefCol+1:nbCols]
 
-top_rig_pixels = image[topRow+1:botRow, lefCol:rigCol-1]
-top_rig_neighs = image[topRow:botRow-1, lefCol+1:rigCol]
+top_rig_pixels = image[topRow+1:nbRows, lefCol:nbCols-1]
+top_rig_neighs = image[topRow:nbRows-1, lefCol+1:nbCols]
 
 logging.debug("bot_pixels.shape = {}".format(bot_pixels.shape))
 logging.debug("bot_neighs.shape = {}".format(bot_neighs.shape))
