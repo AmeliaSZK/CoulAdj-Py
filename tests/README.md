@@ -1,6 +1,6 @@
 # CoulAdj-TestSamples
 
-This repository contains an elaborate set of images meant to be used when testing the correctness
+This repository (or directory, if it has been copy-pasted into a project) contains an elaborate set of images meant to be used when testing the correctness
 and performance of a CoulAdj implementation.
 
 These images were created because previously, the big images used to test the performances
@@ -18,7 +18,7 @@ bigger than the actual sample.
 
 ![sample-preview](./doc/sample-preview.png)
 
-Actual size: ![sample-1](sample-size-1.png)
+Actual size: ![sample-1](samples/sample-size-1.png)
 
 NB: In all samples, the top-right cell was made to always be 1 by 1 pixel.
 This is why you can hardly see the red in the top-right when looking at the bigger
