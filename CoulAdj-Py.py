@@ -233,26 +233,7 @@ logging.debug("image.shape = {}".format(image.shape))
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
 
-def batch_process2(all_pixels, all_neighs):
-    diffs = all_pixels != all_neighs
-    diff_pixels = all_pixels[diffs]
-    diff_neighs = all_neighs[diffs]
-
-    for pair in zip(diff_pixels, diff_neighs):
-        pixelColour = pair[0]
-        neighColour = pair[1]
-        adjacencies.setdefault(pixelColour, set()).add(neighColour)
-        adjacencies.setdefault(neighColour, set()).add(pixelColour)
-
-    return
-
-def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, colOffset):
-    firsRow = 1 + rowOffset
-    lastRow = maxRow-1 + rowOffset
-    firsCol = 1 + colOffset
-    lastCol = maxColumn-1 + colOffset
-    all_neighs = img[firsRow:lastRow, firsCol:lastCol]
-
+def batch_process(all_pixels, all_neighs):
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
@@ -286,19 +267,11 @@ logging.debug("bot_rig_neighs.shape = {}".format(bot_rig_neighs.shape))
 logging.debug("top_rig_pixels.shape = {}".format(top_rig_pixels.shape))
 logging.debug("top_rig_neighs.shape = {}".format(top_rig_neighs.shape))
 
-center_pixels = image[1:-2, 1:-2]
-
-#batch_process(adjacencies, image, bot_pixels, maxRow, maxColumn, BOT_OFFSET, 0)
-#batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, 0, RIG_OFFSET)
-#if relateDiagonals:
-#    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, BOT_OFFSET, RIG_OFFSET)
-#    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, TOP_OFFSET, RIG_OFFSET)
-
-batch_process2(bot_pixels, bot_neighs)
-batch_process2(rig_pixels, rig_neighs)
+batch_process(bot_pixels, bot_neighs)
+batch_process(rig_pixels, rig_neighs)
 if relateDiagonals:
-    batch_process2(bot_rig_pixels, bot_rig_neighs)
-    batch_process2(top_rig_pixels, top_rig_neighs)
+    batch_process(bot_rig_pixels, bot_rig_neighs)
+    batch_process(top_rig_pixels, top_rig_neighs)
 
 # ##### SORT #####
 def sort_adjacencies(adjacencies: dict) -> list:
