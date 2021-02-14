@@ -207,13 +207,12 @@ relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
 # ##### IMPORT #####
-image = imageio.imread(source)
-height = image.shape[0]
-width = image.shape[1]
-nbChannels = image.shape[2]
+source_image = imageio.imread(source)
+height = source_image.shape[0]
+width = source_image.shape[1]
+nbChannels = source_image.shape[2]
 logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
 
-adjacencies = dict()
 nbRows = height
 nbColumns = width
 maxRow = nbRows - 1
@@ -227,146 +226,51 @@ rigCol = maxColumn
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
-image_asColour = np.apply_along_axis(uintc_from_pixelData, 2, image)
+image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
 
 # ##### CALCULATE ADJACENCIES #####
+adjacencies = dict()
 
-def process_pixel_with_diagonals(pixelRow, pixelColumn):
-    pixelColour = image_asColour[pixelRow, pixelColumn]
-    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
+bot_pixels = image[0:-2, :]
+bot_neighs = image[1:-1, :]
 
+rig_pixels = image[:, 0:-2]
+rig_neighs = image[:, 1:-1]
 
-def process_pixel_with_valid_neighbours_with_diagonals(pixelRow, pixelColumn):
-    pixelColour = image_asColour[pixelRow, pixelColumn]
-    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
-    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
-    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, RIG_OFFSET)
-    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, TOP_OFFSET, RIG_OFFSET)
+bot_rig_pixels = image[0:-2, 0:-2]
+bot_rig_neighs = image[1:-1, 1:-1]
 
+top_rig_pixels = image[1:-2, 0:-2]
+top_rig_neighs = image[0:-1, 1:-1]
 
-def process_pixel_sans_diagonals(pixelRow, pixelColumn):
-    pixelColour = image_asColour[pixelRow, pixelColumn]
-    process_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
-    process_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+def batch_process2(all_pixels, all_neighs):
+    diffs = all_pixels != all_neighs
+    diff_pixels = all_pixels[diffs]
+    diff_neighs = all_neighs[diffs]
 
+    for pair in zip(diff_pixels, diff_neighs):
+        pixelColour = pair[0]
+        neighColour = pair[1]
+        adjacencies.setdefault(pixelColour, set()).add(neighColour)
+        adjacencies.setdefault(neighColour, set()).add(pixelColour)
 
-def process_pixel_with_valid_neighbours_sans_diagonals(pixelRow, pixelColumn):
-    pixelColour = image_asColour[pixelRow, pixelColumn]
-    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, BOT_OFFSET, 0)
-    process_valid_neighbour(pixelColour, pixelRow, pixelColumn, 0, RIG_OFFSET)
+    return
 
-
-if relateDiagonals:
-    process_pixel = process_pixel_with_diagonals
-else:
-    process_pixel = process_pixel_sans_diagonals
-
-if relateDiagonals:
-    process_pixel_with_valid_neighbours = process_pixel_with_valid_neighbours_with_diagonals
-else:
-    process_pixel_with_valid_neighbours = process_pixel_with_valid_neighbours_sans_diagonals
-# Yes, I tried writing these function assignations with both the ternary 
-#   operator and only one if-else. And both were hecking eyesores imo.
-#   (The problem is probably with the length of the function names...)
+#batch_process2(bot_pixels, bot_neighs)
+#batch_process2(rig_pixels, rig_neighs)
+#if relateDiagonals:
+#    batch_process2(bot_rig_pixels, bot_rig_neighs)
+#    batch_process2(top_rig_pixels, top_rig_neighs)
 
 
-def process_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
-    neighRow = pixelRow + rowOffset
-    neighColumn = pixelColumn + columnOffset
-    if not valid_row_column(neighRow, neighColumn): 
-        return
-    neighColour = image_asColour[neighRow, neighColumn]
-    if pixelColour == neighColour: 
-        return
-    adjacencies.setdefault(pixelColour, set()).add(neighColour)
-    adjacencies.setdefault(neighColour, set()).add(pixelColour)
-        
-
-def process_valid_neighbour(pixelColour, pixelRow, pixelColumn, rowOffset, columnOffset):
-    neighRow = pixelRow + rowOffset
-    neighColumn = pixelColumn + columnOffset
-    #if not valid_row_column(neighRow, neighColumn): 
-    #    return
-    neighColour = image_asColour[neighRow, neighColumn]
-    if pixelColour == neighColour: 
-        return
-    adjacencies.setdefault(pixelColour, set()).add(neighColour)
-    adjacencies.setdefault(neighColour, set()).add(pixelColour)
-    
-    
-def valid_row_column(row, column):
-    return (0 <= row
-           and 0 <= column
-           and row <= maxRow
-           and column <= maxColumn)
-
-#def same_colours(a, b):
-#    if len(a) != len(b):
-#        raise TypeError("Colours from the same image should have the same number of channels.")
-#    for i in range(len(a)):
-#        if a[i] != b[i]:
-#            return False
-#    return True
-
-# ~~~ Corners ~~~
-# ~ Top Left ~
-process_pixel(topRow, lefCol)
-# ~ Top Right ~
-process_pixel(topRow, rigCol)
-# ~ Bottom Left ~
-process_pixel(botRow, lefCol)
-# ~ Bottom Right ~
-process_pixel(botRow, rigCol)
-
-# ~~~ Edges ~~~
-# ~ Top ~
-for column in range(1, nbColumns - 1):
-    process_pixel(topRow, column)
-# ~ Bottom ~
-for column in range(1, nbColumns - 1):
-    process_pixel(botRow, column)
-# ~ Left ~
-for row in range(1, nbRows - 1):
-    process_pixel(row, lefCol)
-# ~ Right ~
-for row in range(1, nbRows - 1):
-    process_pixel(row, rigCol)
-
-# We validate all neighbours for all pixels in corners and edges because:
-#   1) In an image of N pixels, there are 4 corners and ~4√(N) pixels part of
-#       an edge, so optimizing the validations wouldn't do much anyway.
-#   2) However, optimizing the validations will add a *lot* of complexity
-#       to the code, because now you need to anticipate images of size...
-#       (W is Width and H is Height)
-#       - 1 × 1
-#       - 2 × 2
-#       - 2 × H
-#       - W × 2
-#       - 1 × H
-#       - W × 1
-#       And all the other weird cases I haven't thought of yet.
-#   3) If instead of optimizing, you keep all the checks, then you *know* that
-#       whatever the dimensions, the program will *not* try to access out-of-
-#       bound indexes.
-#
-#   Will an image of 2×4096 have worse performances than expected? Yes.
-#   Is that use-case a priority? No.
-#   Will we still output a *correct* result for a 2×4096? *Yes.*
-
-
-# ~~~ Center ~~~
-
-all_pixels = image_asColour[1:maxRow-1, 1:maxColumn-1]
+all_pixels = image[1:maxRow-1, 1:maxColumn-1]
 
 def batch_process(rowOffset, colOffset):
     firsRow = 1 + rowOffset
     lastRow = maxRow-1 + rowOffset
     firsCol = 1 + colOffset
     lastCol = maxColumn-1 + colOffset
-    all_neighs = image_asColour[firsRow:lastRow, firsCol:lastCol]
+    all_neighs = image[firsRow:lastRow, firsCol:lastCol]
 
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
@@ -380,10 +284,12 @@ def batch_process(rowOffset, colOffset):
 
     return
 
-batch_process(TOP_OFFSET, RIG_OFFSET)
 batch_process(0, RIG_OFFSET)
-batch_process(BOT_OFFSET, RIG_OFFSET)
 batch_process(BOT_OFFSET, 0)
+if relateDiagonals:
+    batch_process(BOT_OFFSET, RIG_OFFSET)
+    batch_process(TOP_OFFSET, RIG_OFFSET)
+
 
 # ##### SORT #####
 def sort_adjacencies(adjacencies: dict) -> list:
