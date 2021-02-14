@@ -88,6 +88,41 @@ BOT_OFFSET = 1
 LEF_OFFSET = -1
 RIG_OFFSET = 1
 
+# ##### CONVERSION FUNCTIONS #####
+# These followings are all different ways of representing the
+#   *same* pixel colour:
+#
+# `pixelData` 
+#       A library converts the image file into a 2D array of pixelData
+# `colourKey`
+#       We convert the pixelData to a `colourKey` to store the colour
+#       in sets and dictionaries
+# `RGBA`
+#       We convert `colourKey` to a tuple of (red, green, blue, alpha) for
+#       two purposes that must be done in this order:
+#       1) Sort the colours
+#       2) Craft the output strings
+
+def uintc_from_pixelData(pixelData: np.ndarray):
+    r = pixelData[0] << 24
+    g = pixelData[1] << 16
+    b = pixelData[2] << 8
+    a = pixelData[3] << 0
+    return r + g + b + a
+
+def RGBA_from_uintc(x):
+    r = x >> 24 & 0x000000FF
+    g = x >> 16 & 0x000000FF
+    b = x >> 8 & 0x000000FF
+    a = x >> 0 & 0x000000FF
+    return (r, g, b, a)
+
+def colourKey_from_pixelData(pixelData: np.ndarray):
+    return uintc_from_pixelData(pixelData)
+
+def RGBA_from_colourKey(colourKey):
+    return RGBA_from_uintc(colourKey)
+
 # ##### INPUTS #####
 source = args.image
 destination = args.results
@@ -115,21 +150,7 @@ rigCol = maxColumn
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
-def encode_to_uintc(colour: np.ndarray):
-    r = colour[0] << 24
-    g = colour[1] << 16
-    b = colour[2] << 8
-    a = colour[3] << 0
-    return r + g + b + a
-
-def tuple_from_uintc(x):
-    r = x >> 24 & 0x000000FF
-    g = x >> 16 & 0x000000FF
-    b = x >> 8 & 0x000000FF
-    a = x >> 0 & 0x000000FF
-    return (r, g, b, a)
-
-image_asColour = np.apply_along_axis(encode_to_uintc, 2, image)
+image_asColour = np.apply_along_axis(uintc_from_pixelData, 2, image)
 
 def process_pixel_with_diagonals(pixelRow, pixelColumn):
     pixelColour = image_asColour[pixelRow, pixelColumn]
@@ -321,10 +342,10 @@ def stringify():
     
     adjacencies_as_tuple = dict()
     for pixel in adjacencies.keys():
-        pixel_tuple = tuple_from_uintc(pixel)
+        pixel_tuple = RGBA_from_uintc(pixel)
         adjacencies_as_tuple[pixel_tuple] = set()
         for neigh in adjacencies[pixel]:
-            neigh_tuple = tuple_from_uintc(neigh)
+            neigh_tuple = RGBA_from_uintc(neigh)
             adjacencies_as_tuple[pixel_tuple].add(neigh_tuple)
 
     sortedAdjacencies = [header]
