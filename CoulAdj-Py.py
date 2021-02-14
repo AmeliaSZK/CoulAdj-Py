@@ -283,11 +283,17 @@ logging.debug("bot_rig_neighs.shape = {}".format(bot_rig_neighs.shape))
 logging.debug("top_rig_pixels.shape = {}".format(top_rig_pixels.shape))
 logging.debug("top_rig_neighs.shape = {}".format(top_rig_neighs.shape))
 
+start_process = time.perf_counter()
+
 batch_process(bot_pixels, bot_neighs)
 batch_process(rig_pixels, rig_neighs)
 if relateDiagonals:
     batch_process(bot_rig_pixels, bot_rig_neighs)
     batch_process(top_rig_pixels, top_rig_neighs)
+
+end_process = time.perf_counter()
+duration_process = round(end_process - start_process, 6)
+logging.debug(f"Processing took {duration_process}s")
 
 # ##### SORT #####
 def sort_adjacencies(adjacencies: dict) -> list:
@@ -304,7 +310,13 @@ def sort_adjacencies(adjacencies: dict) -> list:
 
     return sorted(unsorted_adjacencies)
 
+start_sort = time.perf_counter()
+
 sorted_adjacencies = sort_adjacencies(adjacencies)
+
+end_sort = time.perf_counter()
+duration_sort = round(end_sort - start_sort, 6)
+logging.debug(f"Sorting took {duration_sort}s")
 
 # ##### STRINGIFY #####
 COLUMN_SEPARATOR = "\t"
@@ -356,10 +368,22 @@ def stringify(sorted_adjacencies):
     conform_to_tsv_specifications = joined_lines + "\n"
     return conform_to_tsv_specifications
 
+start_stringify = time.perf_counter()
+
 stringyfied = stringify(sorted_adjacencies)
 
+end_stringify = time.perf_counter()
+duration_stringify = round(end_stringify - start_stringify, 6)
+logging.debug(f"Stringifying took {duration_stringify}s")
+
 # ##### WRITE #####
+start_write = time.perf_counter()
+
 destination.write(stringyfied)
+
+end_write = time.perf_counter()
+duration_write = round(end_write - start_write, 6)
+logging.debug(f"Writing took {duration_write}s")
 
 # ##### EPILOGUE #####
 endTime = time.perf_counter()
