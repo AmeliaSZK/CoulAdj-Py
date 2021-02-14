@@ -281,13 +281,13 @@ def batch_process(all_pixels, rowOffset, colOffset):
 
     return
 
-all_pixels = image[1:-2, 1:-2]
+center_pixels = image[1:-2, 1:-2]
 
-batch_process(all_pixels, BOT_OFFSET, 0)
-batch_process(all_pixels, 0, RIG_OFFSET)
+batch_process(center_pixels, BOT_OFFSET, 0)
+batch_process(center_pixels, 0, RIG_OFFSET)
 if relateDiagonals:
-    batch_process(all_pixels, BOT_OFFSET, RIG_OFFSET)
-    batch_process(all_pixels, TOP_OFFSET, RIG_OFFSET)
+    batch_process(center_pixels, BOT_OFFSET, RIG_OFFSET)
+    batch_process(center_pixels, TOP_OFFSET, RIG_OFFSET)
 
 
 # ##### SORT #####
