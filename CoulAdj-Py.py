@@ -227,14 +227,8 @@ rigCol = maxCol
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
-start_apply = time.perf_counter()
-#image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
-end_apply = time.perf_counter()
-duration_apply = round(end_apply - start_apply, 3)
-
 image = source_image
 logging.debug("image.shape = {}".format(image.shape))
-logging.debug(f"Time spent converting the array: {duration_apply}s")
 
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
