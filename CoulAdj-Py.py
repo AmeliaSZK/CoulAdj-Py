@@ -129,10 +129,10 @@ RIG_OFFSET = 1
 #       From that dictionary, construct a list of `relations`, and sort it
 #
 #   4) Stringify
-#       From that sorted list, craft the list of lines to write in the TSV file
+#       From that sorted list, craft the string to write in the TSV file
 #
 #   5) Write
-#       Take that list of lines, and write them to the TSV file
+#       Take that string, and write it to the TSV file
 #
 # The hard boundary we are establishing is between #2 and #3:
 #   1) Import
@@ -189,13 +189,13 @@ def adjacent_RGBA_from_relation(relation):
 def red_from_RGBA(rgba):
     return rgba[0]
 
-def green_from_RGBA(rgba):
+def gre_from_RGBA(rgba):
     return rgba[1]
 
-def blue_from_RGBA(rgba):
+def blu_from_RGBA(rgba):
     return rgba[2]
 
-def alpha_from_RGBA(rgba):
+def alp_from_RGBA(rgba):
     return rgba[3]
 
 
@@ -386,18 +386,23 @@ batch_process(BOT_OFFSET, RIG_OFFSET)
 batch_process(BOT_OFFSET, 0)
 
 # ##### SORT #####
+def sort_adjacencies(adjacencies: dict) -> list:
+    unsorted_adjacencies = list()
 
+    for this_colour_key, all_adjacents in adjacencies.items():
+        colour_RGBA = RGBA_from_colourKey(this_colour_key)
 
+        for this_adjacent_key in all_adjacents:
+            adjacent_RGBA = RGBA_from_colourKey(this_adjacent_key)
+
+            this_relation = relation_from_two_RGBAs(colour_RGBA, adjacent_RGBA)
+            unsorted_adjacencies.append(this_relation)
+
+    return sorted(unsorted_adjacencies)
+
+sorted_adjacencies = sort_adjacencies(adjacencies)
 
 # ##### STRINGIFY #####
-
-
-
-# ##### WRITE #####
-
-
-
-# ##### OUTPUT #####
 COLUMN_SEPARATOR = "\t"
 
 """
@@ -421,8 +426,10 @@ HEADERS = {
     "RGB_ALPHA" : COLUMN_SEPARATOR.join(["r", "g", "b", "a", "adj_r", "adj_g", "adj_b", "adj_a"])
 }
 
-def stringify():
-    nbChannels = image.shape[2]
+def stringify(sorted_adjacencies):
+    #nbChannels = image.shape[2]
+    HARDCODED_RGBALPHA = 4
+    nbChannels = HARDCODED_RGBALPHA
     if nbChannels == 3:
         header = HEADERS["RGB"]
     elif nbChannels == 4:
@@ -430,30 +437,32 @@ def stringify():
     else:
         raise TypeError("Image must have 3 or 4 channels")
     
-    adjacencies_as_tuple = dict()
-    for pixel in adjacencies.keys():
-        pixel_tuple = RGBA_from_uintc(pixel)
-        adjacencies_as_tuple[pixel_tuple] = set()
-        for neigh in adjacencies[pixel]:
-            neigh_tuple = RGBA_from_uintc(neigh)
-            adjacencies_as_tuple[pixel_tuple].add(neigh_tuple)
-
-    sortedAdjacencies = [header]
-    sortedPixels = sorted(adjacencies_as_tuple.keys())
-    for pixel in sortedPixels:
-        neighboursAsSet = adjacencies_as_tuple[pixel]
-        sortedNeighbours = sorted(list(neighboursAsSet))
-        for neighbour in sortedNeighbours:
-            sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
+    all_lines = list()
+    all_lines.append(header)
+    for relation in sorted_adjacencies:
+        colour_RGBA = colour_RGBA_from_relation(relation)
+        adjcnt_RGBA = adjacent_RGBA_from_relation(relation)
+        r = red_from_RGBA(colour_RGBA)
+        g = gre_from_RGBA(colour_RGBA)
+        b = blu_from_RGBA(colour_RGBA)
+        a = alp_from_RGBA(colour_RGBA)
+        adj_r = red_from_RGBA(adjcnt_RGBA)
+        adj_g = gre_from_RGBA(adjcnt_RGBA)
+        adj_b = blu_from_RGBA(adjcnt_RGBA)
+        adj_a = alp_from_RGBA(adjcnt_RGBA)
+        channels = [r, g, b, a, adj_r, adj_g, adj_b, adj_a]
+        joined_channels = COLUMN_SEPARATOR.join(map(str, channels))
+        all_lines.append(joined_channels)
             
     # TSV specifications say that each line must end with EOL
     # https://www.iana.org/assignments/media-types/text/tab-separated-values
-    joinedAdjacencies = "\n".join(sortedAdjacencies)
-    conformToTsvSpecifications = joinedAdjacencies + "\n"
-    return conformToTsvSpecifications
+    joined_lines = "\n".join(all_lines)
+    conform_to_tsv_specifications = joined_lines + "\n"
+    return conform_to_tsv_specifications
 
-stringyfied = stringify()
+stringyfied = stringify(sorted_adjacencies)
 
+# ##### WRITE #####
 destination.write(stringyfied)
 
 # ##### EPILOGUE #####
