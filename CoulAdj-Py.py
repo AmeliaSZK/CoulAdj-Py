@@ -226,12 +226,17 @@ rigCol = maxColumn
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
+logging.debug("source_image.shape = {}".format(source_image.shape))
 image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
+logging.debug("image.shape = {}".format(image.shape))
 
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
 
 def batch_process2(all_pixels, all_neighs):
+    logging.debug("all_pixels.shape = {}".format(all_pixels.shape))
+    logging.debug("all_neighs.shape = {}".format(all_neighs.shape))
+
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
@@ -243,24 +248,6 @@ def batch_process2(all_pixels, all_neighs):
         adjacencies.setdefault(neighColour, set()).add(pixelColour)
 
     return
-
-#batch_process2(bot_pixels, bot_neighs)
-#batch_process2(rig_pixels, rig_neighs)
-#if relateDiagonals:
-#    batch_process2(bot_rig_pixels, bot_rig_neighs)
-#    batch_process2(top_rig_pixels, top_rig_neighs)
-
-bot_pixels = image[0:-2, :]
-bot_neighs = image[1:-1, :]
-
-rig_pixels = image[:, 0:-2]
-rig_neighs = image[:, 1:-1]
-
-bot_rig_pixels = image[0:-2, 0:-2]
-bot_rig_neighs = image[1:-1, 1:-1]
-
-top_rig_pixels = image[1:-2, 0:-2]
-top_rig_neighs = image[0:-1, 1:-1]
 
 def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, colOffset):
     firsRow = 1 + rowOffset
@@ -269,6 +256,9 @@ def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, co
     lastCol = maxColumn-1 + colOffset
     all_neighs = img[firsRow:lastRow, firsCol:lastCol]
 
+    logging.debug("all_pixels.shape = {}".format(all_pixels.shape))
+    logging.debug("all_neighs.shape = {}".format(all_neighs.shape))
+
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
@@ -281,14 +271,40 @@ def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, co
 
     return
 
+bot_pixels = image[topRow:botRow-1, lefCol:rigCol]
+bot_neighs = image[topRow+1:botRow, lefCol:rigCol]
+
+rig_pixels = image[topRow:botRow, lefCol:rigCol-1]
+rig_neighs = image[topRow:botRow, lefCol+1:rigCol]
+
+bot_rig_pixels = image[topRow:botRow-1, lefCol:rigCol-1]
+bot_rig_neighs = image[topRow+1:botRow, lefCol+1:rigCol]
+
+top_rig_pixels = image[topRow+1:botRow, lefCol:rigCol-1]
+top_rig_neighs = image[topRow:botRow-1, lefCol+1:rigCol]
+
+logging.debug("bot_pixels.shape = {}".format(bot_pixels.shape))
+logging.debug("bot_neighs.shape = {}".format(bot_neighs.shape))
+logging.debug("rig_pixels.shape = {}".format(rig_pixels.shape))
+logging.debug("rig_neighs.shape = {}".format(rig_neighs.shape))
+logging.debug("bot_rig_pixels.shape = {}".format(bot_rig_pixels.shape))
+logging.debug("bot_rig_neighs.shape = {}".format(bot_rig_neighs.shape))
+logging.debug("top_rig_pixels.shape = {}".format(top_rig_pixels.shape))
+logging.debug("top_rig_neighs.shape = {}".format(top_rig_neighs.shape))
+
 center_pixels = image[1:-2, 1:-2]
 
-batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, BOT_OFFSET, 0)
-batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, 0, RIG_OFFSET)
-if relateDiagonals:
-    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, BOT_OFFSET, RIG_OFFSET)
-    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, TOP_OFFSET, RIG_OFFSET)
+#batch_process(adjacencies, image, bot_pixels, maxRow, maxColumn, BOT_OFFSET, 0)
+#batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, 0, RIG_OFFSET)
+#if relateDiagonals:
+#    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, BOT_OFFSET, RIG_OFFSET)
+#    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, TOP_OFFSET, RIG_OFFSET)
 
+batch_process2(bot_pixels, bot_neighs)
+batch_process2(rig_pixels, rig_neighs)
+if relateDiagonals:
+    batch_process2(bot_rig_pixels, bot_rig_neighs)
+    batch_process2(top_rig_pixels, top_rig_neighs)
 
 # ##### SORT #####
 def sort_adjacencies(adjacencies: dict) -> list:
