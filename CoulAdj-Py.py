@@ -262,10 +262,7 @@ def batch_process2(all_pixels, all_neighs):
 #    batch_process2(bot_rig_pixels, bot_rig_neighs)
 #    batch_process2(top_rig_pixels, top_rig_neighs)
 
-
-all_pixels = image[1:maxRow-1, 1:maxColumn-1]
-
-def batch_process(rowOffset, colOffset):
+def batch_process(all_pixels, rowOffset, colOffset):
     firsRow = 1 + rowOffset
     lastRow = maxRow-1 + rowOffset
     firsCol = 1 + colOffset
@@ -284,11 +281,13 @@ def batch_process(rowOffset, colOffset):
 
     return
 
-batch_process(0, RIG_OFFSET)
-batch_process(BOT_OFFSET, 0)
+all_pixels = image[1:maxRow-1, 1:maxColumn-1]
+
+batch_process(bot_pixels, BOT_OFFSET, 0)
+batch_process(rig_pixels, 0, RIG_OFFSET)
 if relateDiagonals:
-    batch_process(BOT_OFFSET, RIG_OFFSET)
-    batch_process(TOP_OFFSET, RIG_OFFSET)
+    batch_process(bot_rig_pixels, BOT_OFFSET, RIG_OFFSET)
+    batch_process(top_rig_pixels, TOP_OFFSET, RIG_OFFSET)
 
 
 # ##### SORT #####
