@@ -25,6 +25,10 @@ and documentation.
     * _NB: Upon install, Anaconda will modify your command line prompt to prefix
         it with the active environment in parenthesis._
 
+# Known limitations
+*   Max of 8 bits per channel
+*   Minimum dimensions of 3x3 pixels
+
 # How to run
 
 **NB: These instructions have not been tested on Windows**
@@ -305,9 +309,6 @@ With the example above, this is how you would calculate what to record in `all_s
         * If present, only consider as adjacent the four (4) neighbours with
         a common edge. (top, bottom, left, and right neighbours)
         * By default, all 8 neighbours are considered adjacent.
-
-## Known limitations
-*   (none yet)
 
 
 ## Output
