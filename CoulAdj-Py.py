@@ -248,6 +248,8 @@ logging.debug("image.shape = {}".format(image.shape))
 adjacencies = dict()
 
 def batch_process(all_pixels, all_neighs):
+    # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
+    # (with modifications)
     diffs = (all_pixels != all_neighs).any(axis=2)
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
