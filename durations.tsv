@@ -16,3 +16,7 @@ Numpy1	0.505*	Used proper Numpy functions to process. Probably not at Numpy's li
 Decoup	0.507*	Decoupled data types in calculations from crafting of the output
 Numpy2	0.512*	Removed special casing for corners and edges
 Consts2	0.496*	Removed variables for slicing
+Func	0.500*	Removed 1 indirection for conversion functions
+Func2	0.499*	Reverted to Consts2
+Comp1	0.097*	No conversion, but use of (a != b).any(axis=2) to compare
+Clean2	0.099*	Removed obsolete timer. (I worried it was affecting measurements)
