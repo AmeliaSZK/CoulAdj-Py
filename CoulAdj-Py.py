@@ -96,12 +96,64 @@ RIG_OFFSET = 1
 #       A library converts the image file into a 2D array of pixelData
 # `colourKey`
 #       We convert the pixelData to a `colourKey` to store the colour
-#       in sets and dictionaries
+#       in sets and dictionaries. 
 # `RGBA`
 #       We convert `colourKey` to a tuple of (red, green, blue, alpha) for
 #       two purposes that must be done in this order:
-#       1) Sort the colours
-#       2) Craft the output strings
+#           1) Sort the colours
+#           2) Craft the output strings
+#       And yes, it MUST be a *tuple* of (red, green, blue, alpha).
+#
+# Additionally, we have:
+#
+# `relation`
+#       A record of two RGBA colours adjacent to each others.
+#       More specifically, it is a one-way directed relation. So to represent
+#       one "adjacency", we need two "relations".
+#
+# ~~~ Program Outline ~~~
+# Optimizing the program to an acceptable level of performance involves a lot
+#   experimentation with data types and conversions.
+# In order to make this experimentation more convenient, we establish a
+#   hard decoupling betwen the processing and the output crafting.
+#
+# More specifically, a general outline of the program is:
+#   1) Import
+#       From the image filepath, construct a 2D array of colours
+#
+#   2) Calculate Adjacencies
+#       From that 2D array, construct a dictionary of colours (keys) and
+#       sets of adjacent colours (values)
+#
+#   3) Sort
+#       From that dictionary, construct a list of `relations`, and sort it
+#
+#   4) Stringify
+#       From that sorted list, craft the list of lines to write in the TSV file
+#
+#   5) Write
+#       Take that list of lines, and write them to the TSV file
+#
+# The hard boundary we are establishing is between #2 and #3:
+#   1) Import
+#   2) Calculate Adjacencies
+#   ~~~ BOUNDARY HERE ~~~
+#   3) Sort
+#   4) Stringify
+#   5) Write
+#
+# More specifically, this means that the Sort section expects to work with
+#   a dictionary of `colourKey` as keys, and a set of `colourKey` as values.
+# So Import & Calculate Adjacencies can introduce coupling to optimize, and
+#   Sort, Stringify, & Write can also take shortcuts between each others,
+# But at the boundary, it MUST be the expected dict that is passed.
+#
+# Furthermore, while RGBA_from_colourKey may have been previously defined,
+#   the sections before the Boundary are responsible for making sure that the 
+#   correct conversion function has been assigned to RGBA_from_colourKey.
+#       (Yes, I know that have more than 1 responsible is asking for trouble,
+#       but as I am writing these lines, the new outline has not been 
+#       implemented yet so things will probably evolve.)
 
 def uintc_from_pixelData(pixelData: np.ndarray):
     r = pixelData[0] << 24
@@ -120,8 +172,33 @@ def RGBA_from_uintc(x):
 def colourKey_from_pixelData(pixelData: np.ndarray):
     return uintc_from_pixelData(pixelData)
 
+# ~~~ BOUNDARY ~~~
 def RGBA_from_colourKey(colourKey):
     return RGBA_from_uintc(colourKey)
+# ~~~ BOUNDARY ~~~
+
+def relation_from_two_RGBAs(rgba1, rgba2):
+    return (rgba1, rgba2)
+
+def colour_RGBA_from_relation(relation):
+    return relation[0]
+
+def adjacent_RGBA_from_relation(relation):
+    return relation[1]
+
+def red_from_RGBA(rgba):
+    return rgba[0]
+
+def green_from_RGBA(rgba):
+    return rgba[1]
+
+def blue_from_RGBA(rgba):
+    return rgba[2]
+
+def alpha_from_RGBA(rgba):
+    return rgba[3]
+
+
 
 # ##### INPUTS #####
 source = args.image
@@ -129,7 +206,7 @@ destination = args.results
 relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
-# ##### PROCESSING #####
+# ##### IMPORT #####
 image = imageio.imread(source)
 height = image.shape[0]
 width = image.shape[1]
@@ -151,6 +228,8 @@ logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
 image_asColour = np.apply_along_axis(uintc_from_pixelData, 2, image)
+
+# ##### CALCULATE ADJACENCIES #####
 
 def process_pixel_with_diagonals(pixelRow, pixelColumn):
     pixelColour = image_asColour[pixelRow, pixelColumn]
@@ -305,6 +384,17 @@ batch_process(TOP_OFFSET, RIG_OFFSET)
 batch_process(0, RIG_OFFSET)
 batch_process(BOT_OFFSET, RIG_OFFSET)
 batch_process(BOT_OFFSET, 0)
+
+# ##### SORT #####
+
+
+
+# ##### STRINGIFY #####
+
+
+
+# ##### WRITE #####
+
 
 
 # ##### OUTPUT #####
