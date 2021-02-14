@@ -13,3 +13,4 @@ Base_32	1.399*	Sample size 32.
 Base_64	5.527*	Sample size 64.
 Clean1b	0.376*	Reverted test script to Clean1
 Numpy1	0.505*	Used proper Numpy functions to process. Probably not at Numpy's limit yet.
+Decoup	0.507*	Decoupled data types in calculations from crafting of the output

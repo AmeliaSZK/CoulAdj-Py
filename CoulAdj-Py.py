@@ -88,13 +88,125 @@ BOT_OFFSET = 1
 LEF_OFFSET = -1
 RIG_OFFSET = 1
 
+# ##### CONVERSION FUNCTIONS #####
+# These followings are all different ways of representing the
+#   *same* pixel colour:
+#
+# `pixelData` 
+#       A library converts the image file into a 2D array of pixelData
+# `colourKey`
+#       We convert the pixelData to a `colourKey` to store the colour
+#       in sets and dictionaries. 
+# `RGBA`
+#       We convert `colourKey` to a tuple of (red, green, blue, alpha) for
+#       two purposes that must be done in this order:
+#           1) Sort the colours
+#           2) Craft the output strings
+#       And yes, it MUST be a *tuple* of (red, green, blue, alpha).
+#
+# Additionally, we have:
+#
+# `relation`
+#       A record of two RGBA colours adjacent to each others.
+#       More specifically, it is a one-way directed relation. So to represent
+#       one "adjacency", we need two "relations".
+#
+# ~~~ Program Outline ~~~
+# Optimizing the program to an acceptable level of performance involves a lot
+#   experimentation with data types and conversions.
+# In order to make this experimentation more convenient, we establish a
+#   hard decoupling betwen the processing and the output crafting.
+#
+# More specifically, a general outline of the program is:
+#   1) Import
+#       From the image filepath, construct a 2D array of colours
+#
+#   2) Calculate Adjacencies
+#       From that 2D array, construct a dictionary of colours (keys) and
+#       sets of adjacent colours (values)
+#
+#   3) Sort
+#       From that dictionary, construct a list of `relations`, and sort it
+#
+#   4) Stringify
+#       From that sorted list, craft the string to write in the TSV file
+#
+#   5) Write
+#       Take that string, and write it to the TSV file
+#
+# The hard boundary we are establishing is between #2 and #3:
+#   1) Import
+#   2) Calculate Adjacencies
+#   ~~~ BOUNDARY HERE ~~~
+#   3) Sort
+#   4) Stringify
+#   5) Write
+#
+# More specifically, this means that the Sort section expects to work with
+#   a dictionary of `colourKey` as keys, and a set of `colourKey` as values.
+# So Import & Calculate Adjacencies can introduce coupling to optimize, and
+#   Sort, Stringify, & Write can also take shortcuts between each others,
+# But at the boundary, it MUST be the expected dict that is passed.
+#
+# Furthermore, while RGBA_from_colourKey may have been previously defined,
+#   the sections before the Boundary are responsible for making sure that the 
+#   correct conversion function has been assigned to RGBA_from_colourKey.
+#       (Yes, I know that have more than 1 responsible is asking for trouble,
+#       but as I am writing these lines, the new outline has not been 
+#       implemented yet so things will probably evolve.)
+
+def uintc_from_pixelData(pixelData: np.ndarray):
+    r = pixelData[0] << 24
+    g = pixelData[1] << 16
+    b = pixelData[2] << 8
+    a = pixelData[3] << 0
+    return r + g + b + a
+
+def RGBA_from_uintc(x):
+    r = x >> 24 & 0x000000FF
+    g = x >> 16 & 0x000000FF
+    b = x >> 8 & 0x000000FF
+    a = x >> 0 & 0x000000FF
+    return (r, g, b, a)
+
+def colourKey_from_pixelData(pixelData: np.ndarray):
+    return uintc_from_pixelData(pixelData)
+
+# ~~~ BOUNDARY ~~~
+def RGBA_from_colourKey(colourKey):
+    return RGBA_from_uintc(colourKey)
+# ~~~ BOUNDARY ~~~
+
+def relation_from_two_RGBAs(rgba1, rgba2):
+    return (rgba1, rgba2)
+
+def colour_RGBA_from_relation(relation):
+    return relation[0]
+
+def adjacent_RGBA_from_relation(relation):
+    return relation[1]
+
+def red_from_RGBA(rgba):
+    return rgba[0]
+
+def gre_from_RGBA(rgba):
+    return rgba[1]
+
+def blu_from_RGBA(rgba):
+    return rgba[2]
+
+def alp_from_RGBA(rgba):
+    return rgba[3]
+
+
+
 # ##### INPUTS #####
 source = args.image
 destination = args.results
 relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
-# ##### PROCESSING #####
+# ##### IMPORT #####
 image = imageio.imread(source)
 height = image.shape[0]
 width = image.shape[1]
@@ -115,21 +227,9 @@ rigCol = maxColumn
 logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
-def encode_to_uintc(colour: np.ndarray):
-    r = colour[0] << 24
-    g = colour[1] << 16
-    b = colour[2] << 8
-    a = colour[3] << 0
-    return r + g + b + a
+image_asColour = np.apply_along_axis(uintc_from_pixelData, 2, image)
 
-def tuple_from_uintc(x):
-    r = x >> 24 & 0x000000FF
-    g = x >> 16 & 0x000000FF
-    b = x >> 8 & 0x000000FF
-    a = x >> 0 & 0x000000FF
-    return (r, g, b, a)
-
-image_asColour = np.apply_along_axis(encode_to_uintc, 2, image)
+# ##### CALCULATE ADJACENCIES #####
 
 def process_pixel_with_diagonals(pixelRow, pixelColumn):
     pixelColour = image_asColour[pixelRow, pixelColumn]
@@ -285,8 +385,24 @@ batch_process(0, RIG_OFFSET)
 batch_process(BOT_OFFSET, RIG_OFFSET)
 batch_process(BOT_OFFSET, 0)
 
+# ##### SORT #####
+def sort_adjacencies(adjacencies: dict) -> list:
+    unsorted_adjacencies = list()
 
-# ##### OUTPUT #####
+    for this_colour_key, all_adjacents in adjacencies.items():
+        colour_RGBA = RGBA_from_colourKey(this_colour_key)
+
+        for this_adjacent_key in all_adjacents:
+            adjacent_RGBA = RGBA_from_colourKey(this_adjacent_key)
+
+            this_relation = relation_from_two_RGBAs(colour_RGBA, adjacent_RGBA)
+            unsorted_adjacencies.append(this_relation)
+
+    return sorted(unsorted_adjacencies)
+
+sorted_adjacencies = sort_adjacencies(adjacencies)
+
+# ##### STRINGIFY #####
 COLUMN_SEPARATOR = "\t"
 
 """
@@ -310,8 +426,10 @@ HEADERS = {
     "RGB_ALPHA" : COLUMN_SEPARATOR.join(["r", "g", "b", "a", "adj_r", "adj_g", "adj_b", "adj_a"])
 }
 
-def stringify():
-    nbChannels = image.shape[2]
+def stringify(sorted_adjacencies):
+    #nbChannels = image.shape[2]
+    HARDCODED_RGBALPHA = 4
+    nbChannels = HARDCODED_RGBALPHA
     if nbChannels == 3:
         header = HEADERS["RGB"]
     elif nbChannels == 4:
@@ -319,30 +437,32 @@ def stringify():
     else:
         raise TypeError("Image must have 3 or 4 channels")
     
-    adjacencies_as_tuple = dict()
-    for pixel in adjacencies.keys():
-        pixel_tuple = tuple_from_uintc(pixel)
-        adjacencies_as_tuple[pixel_tuple] = set()
-        for neigh in adjacencies[pixel]:
-            neigh_tuple = tuple_from_uintc(neigh)
-            adjacencies_as_tuple[pixel_tuple].add(neigh_tuple)
-
-    sortedAdjacencies = [header]
-    sortedPixels = sorted(adjacencies_as_tuple.keys())
-    for pixel in sortedPixels:
-        neighboursAsSet = adjacencies_as_tuple[pixel]
-        sortedNeighbours = sorted(list(neighboursAsSet))
-        for neighbour in sortedNeighbours:
-            sortedAdjacencies.append(COLUMN_SEPARATOR.join(map(str, pixel + neighbour)))
+    all_lines = list()
+    all_lines.append(header)
+    for relation in sorted_adjacencies:
+        colour_RGBA = colour_RGBA_from_relation(relation)
+        adjcnt_RGBA = adjacent_RGBA_from_relation(relation)
+        r = red_from_RGBA(colour_RGBA)
+        g = gre_from_RGBA(colour_RGBA)
+        b = blu_from_RGBA(colour_RGBA)
+        a = alp_from_RGBA(colour_RGBA)
+        adj_r = red_from_RGBA(adjcnt_RGBA)
+        adj_g = gre_from_RGBA(adjcnt_RGBA)
+        adj_b = blu_from_RGBA(adjcnt_RGBA)
+        adj_a = alp_from_RGBA(adjcnt_RGBA)
+        channels = [r, g, b, a, adj_r, adj_g, adj_b, adj_a]
+        joined_channels = COLUMN_SEPARATOR.join(map(str, channels))
+        all_lines.append(joined_channels)
             
     # TSV specifications say that each line must end with EOL
     # https://www.iana.org/assignments/media-types/text/tab-separated-values
-    joinedAdjacencies = "\n".join(sortedAdjacencies)
-    conformToTsvSpecifications = joinedAdjacencies + "\n"
-    return conformToTsvSpecifications
+    joined_lines = "\n".join(all_lines)
+    conform_to_tsv_specifications = joined_lines + "\n"
+    return conform_to_tsv_specifications
 
-stringyfied = stringify()
+stringyfied = stringify(sorted_adjacencies)
 
+# ##### WRITE #####
 destination.write(stringyfied)
 
 # ##### EPILOGUE #####
