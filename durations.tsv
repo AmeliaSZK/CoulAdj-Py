@@ -22,3 +22,4 @@ Comp1	0.097*	No conversion, but use of (a != b).any(axis=2) to compare
 Clean2	0.099*	Removed obsolete timer. (I worried it was affecting measurements)
 BaseP	20.4	New baseline. Input is the proprietary warhammer_map_1_1_shadow.bmp
 Func3	20.7	Skipped intermediary variables in colourKey_from_pixelData
+Func4	21.0	Reverted to BaseP

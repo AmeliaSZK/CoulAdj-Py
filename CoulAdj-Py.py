@@ -156,16 +156,18 @@ RIG_OFFSET = 1
 #       implemented yet so things will probably evolve.)
 
 def uintc_from_pixelData_rgbalpha(pixelData: np.ndarray):
-    return (pixelData[0] << 24) \
-        + (pixelData[1] << 16) \
-        + (pixelData[2] << 8) \
-        + pixelData[3] 
+    r = pixelData[0] << 24
+    g = pixelData[1] << 16
+    b = pixelData[2] << 8
+    a = pixelData[3] << 0
+    return r + g + b + a
 
 def uintc_from_pixelData_rgb(pixelData: np.ndarray):
-    return (pixelData[0] << 24) \
-        + (pixelData[1] << 16) \
-        + (pixelData[2] << 8) \
-        + 255 
+    r = pixelData[0] << 24
+    g = pixelData[1] << 16
+    b = pixelData[2] << 8
+    a = 255
+    return r + g + b + a
 
 def RGBA_from_uintc(x):
     r = x >> 24 & 0x000000FF
