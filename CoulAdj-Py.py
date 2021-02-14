@@ -230,9 +230,6 @@ logging.debug("source_image.shape = {}".format(source_image.shape))
 image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
 logging.debug("image.shape = {}".format(image.shape))
 
-colourKey_from_pixelData = uintc_from_pixelData
-RGBA_from_colourKey = RGBA_from_uintc
-
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
 

@@ -17,3 +17,4 @@ Decoup	0.507*	Decoupled data types in calculations from crafting of the output
 Numpy2	0.512*	Removed special casing for corners and edges
 Consts2	0.496*	Removed variables for slicing
 Func	0.500*	Removed 1 indirection for conversion functions
+Func2	0.499*	Reverted to Consts2
