@@ -246,17 +246,17 @@ def batch_process(all_pixels, all_neighs):
 
     return
 
-bot_pixels = image[topRow:nbRows-1, lefCol:nbCols]
-bot_neighs = image[topRow+1:nbRows, lefCol:nbCols]
+bot_pixels = image[0:-1, :]
+bot_neighs = image[1:  , :]
 
-rig_pixels = image[topRow:nbRows, lefCol:nbCols-1]
-rig_neighs = image[topRow:nbRows, lefCol+1:nbCols]
+rig_pixels = image[:, 0:-1]
+rig_neighs = image[:, 1:]
 
-bot_rig_pixels = image[topRow:nbRows-1, lefCol:nbCols-1]
-bot_rig_neighs = image[topRow+1:nbRows, lefCol+1:nbCols]
+bot_rig_pixels = image[0:-1, 0:-1]
+bot_rig_neighs = image[1:  , 1:]
 
-top_rig_pixels = image[topRow+1:nbRows, lefCol:nbCols-1]
-top_rig_neighs = image[topRow:nbRows-1, lefCol+1:nbCols]
+top_rig_pixels = image[1:  , 0:-1]
+top_rig_neighs = image[0:-1, 1:]
 
 logging.debug("bot_pixels.shape = {}".format(bot_pixels.shape))
 logging.debug("bot_neighs.shape = {}".format(bot_neighs.shape))

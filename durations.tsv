@@ -15,3 +15,4 @@ Clean1b	0.376*	Reverted test script to Clean1
 Numpy1	0.505*	Used proper Numpy functions to process. Probably not at Numpy's limit yet.
 Decoup	0.507*	Decoupled data types in calculations from crafting of the output
 Numpy2	0.512*	Removed special casing for corners and edges
+Consts2	0.496*	Removed variables for slicing
