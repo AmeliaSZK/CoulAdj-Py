@@ -231,18 +231,6 @@ image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
 
-bot_pixels = image[0:-2, :]
-bot_neighs = image[1:-1, :]
-
-rig_pixels = image[:, 0:-2]
-rig_neighs = image[:, 1:-1]
-
-bot_rig_pixels = image[0:-2, 0:-2]
-bot_rig_neighs = image[1:-1, 1:-1]
-
-top_rig_pixels = image[1:-2, 0:-2]
-top_rig_neighs = image[0:-1, 1:-1]
-
 def batch_process2(all_pixels, all_neighs):
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
@@ -262,12 +250,24 @@ def batch_process2(all_pixels, all_neighs):
 #    batch_process2(bot_rig_pixels, bot_rig_neighs)
 #    batch_process2(top_rig_pixels, top_rig_neighs)
 
-def batch_process(all_pixels, rowOffset, colOffset):
+bot_pixels = image[0:-2, :]
+bot_neighs = image[1:-1, :]
+
+rig_pixels = image[:, 0:-2]
+rig_neighs = image[:, 1:-1]
+
+bot_rig_pixels = image[0:-2, 0:-2]
+bot_rig_neighs = image[1:-1, 1:-1]
+
+top_rig_pixels = image[1:-2, 0:-2]
+top_rig_neighs = image[0:-1, 1:-1]
+
+def batch_process(adjacencies, img, all_pixels, maxRow, maxColumn, rowOffset, colOffset):
     firsRow = 1 + rowOffset
     lastRow = maxRow-1 + rowOffset
     firsCol = 1 + colOffset
     lastCol = maxColumn-1 + colOffset
-    all_neighs = image[firsRow:lastRow, firsCol:lastCol]
+    all_neighs = img[firsRow:lastRow, firsCol:lastCol]
 
     diffs = all_pixels != all_neighs
     diff_pixels = all_pixels[diffs]
@@ -283,11 +283,11 @@ def batch_process(all_pixels, rowOffset, colOffset):
 
 center_pixels = image[1:-2, 1:-2]
 
-batch_process(center_pixels, BOT_OFFSET, 0)
-batch_process(center_pixels, 0, RIG_OFFSET)
+batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, BOT_OFFSET, 0)
+batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, 0, RIG_OFFSET)
 if relateDiagonals:
-    batch_process(center_pixels, BOT_OFFSET, RIG_OFFSET)
-    batch_process(center_pixels, TOP_OFFSET, RIG_OFFSET)
+    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, BOT_OFFSET, RIG_OFFSET)
+    batch_process(adjacencies, image, center_pixels, maxRow, maxColumn, TOP_OFFSET, RIG_OFFSET)
 
 
 # ##### SORT #####
