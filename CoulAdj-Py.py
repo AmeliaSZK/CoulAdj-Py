@@ -228,9 +228,11 @@ logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
     .format(topRow, botRow, lefCol, rigCol))
 
 start_apply = time.perf_counter()
-image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
+#image = np.apply_along_axis(colourKey_from_pixelData, 2, source_image)
 end_apply = time.perf_counter()
 duration_apply = round(end_apply - start_apply, 3)
+
+image = source_image
 logging.debug("image.shape = {}".format(image.shape))
 logging.debug(f"Time spent converting the array: {duration_apply}s")
 
@@ -238,13 +240,13 @@ logging.debug(f"Time spent converting the array: {duration_apply}s")
 adjacencies = dict()
 
 def batch_process(all_pixels, all_neighs):
-    diffs = all_pixels != all_neighs
+    diffs = (all_pixels != all_neighs).any(axis=2)
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
 
     for pair in zip(diff_pixels, diff_neighs):
-        pixelColour = pair[0]
-        neighColour = pair[1]
+        pixelColour = colourKey_from_pixelData(pair[0])
+        neighColour = colourKey_from_pixelData(pair[1])
         adjacencies.setdefault(pixelColour, set()).add(neighColour)
         adjacencies.setdefault(neighColour, set()).add(pixelColour)
 

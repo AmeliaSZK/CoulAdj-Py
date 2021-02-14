@@ -18,3 +18,4 @@ Numpy2	0.512*	Removed special casing for corners and edges
 Consts2	0.496*	Removed variables for slicing
 Func	0.500*	Removed 1 indirection for conversion functions
 Func2	0.499*	Reverted to Consts2
+Comp1	0.097*	No conversion, but use of (a != b).any(axis=2) to compare
