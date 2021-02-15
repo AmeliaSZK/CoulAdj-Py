@@ -116,11 +116,10 @@ logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=
 #       From the image filepath, construct a 2D array of colours
 #
 #   2) Calculate Adjacencies
-#       From that 2D array, construct a dictionary of colours (keys) and
-#       sets of adjacent colours (values)
+#       From that 2D array, construct a set of `relations`
 #
 #   3) Sort
-#       From that dictionary, construct a list of `relations`, and sort it
+#       From that set, construct a sorted list of `relations`
 #
 #   4) Stringify
 #       From that sorted list, craft the string to write in the TSV file
@@ -180,11 +179,11 @@ def colourKey_from_pixelData(pixelData: np.ndarray):
 
 def RGBA_from_colourKey(colourKey):
     pass
-# ~~~ BOUNDARY ~~~
-
 
 def relation_from_two_RGBAs(rgba1, rgba2):
     return (rgba1, rgba2)
+# ~~~ BOUNDARY ~~~
+
 
 def colour_RGBA_from_relation(relation):
     return relation[0]
@@ -234,9 +233,13 @@ else:
     raise TypeError("Image must have 3 or 4 channels")
 
 # ##### CALCULATE ADJACENCIES #####
-adjacencies = dict()
+all_adjacencies = set()
+adjacencies_bottom = set()
+adjacencies_right = set()
+adjacencies_bottom_right = set()
+adjacencies_top_right = set()
 
-def batch_process(all_pixels, all_neighs):
+def batch_process(adjacencies, all_pixels, all_neighs):
     # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
     # (with modifications)
     start = time.perf_counter()
@@ -250,28 +253,18 @@ def batch_process(all_pixels, all_neighs):
     
     end_list = time.perf_counter()
 
-    zipped = zip(diff_pixels, diff_neighs)
-    unique = {
-        (colourKey_from_pixelData(pair[0]), 
-        colourKey_from_pixelData(pair[1])) 
-        for pair in zipped
-        }
-    
-    end_purge = time.perf_counter()
-
-    for pair in unique:
-        pixelColour = pair[0]
-        neighColour = pair[1]
-        adjacencies.setdefault(pixelColour, set()).add(neighColour)
-        adjacencies.setdefault(neighColour, set()).add(pixelColour)
+    for pair in zip(diff_pixels, diff_neighs):
+        pixelColour = RGBA_from_colourKey(pair[0])
+        neighColour = RGBA_from_colourKey(pair[1])
+        adjacencies.add(relation_from_two_RGBAs(pixelColour, neighColour))
+        adjacencies.add(relation_from_two_RGBAs(neighColour, pixelColour))
     
     end_register = time.perf_counter()
 
     duration_comp = round(end_comp - start, 6)
     duration_list = round(end_list - end_comp, 6)
-    duration_purge = round(end_purge - end_list, 6)
-    duration_regi = round(end_register - end_purge, 6)
-    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Purging: {duration_purge}, Registering: {duration_regi}")
+    duration_regi = round(end_register - end_list, 6)
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Registering: {duration_regi}")
 
     return
 
@@ -287,32 +280,22 @@ top_rig_neighs = image[0:-1, 1:]
 
 start_process = time.perf_counter()
 
-batch_process(bot_pixels, bot_neighs)
-batch_process(rig_pixels, rig_neighs)
+batch_process(all_adjacencies, bot_pixels, bot_neighs)
+batch_process(all_adjacencies, rig_pixels, rig_neighs)
 if relateDiagonals:
-    batch_process(bot_rig_pixels, bot_rig_neighs)
-    batch_process(top_rig_pixels, top_rig_neighs)
+    batch_process(all_adjacencies, bot_rig_pixels, bot_rig_neighs)
+    batch_process(all_adjacencies, top_rig_pixels, top_rig_neighs)
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
 logging.debug(f"Processing took {duration_process}s")
 
 # ##### SORT #####
-def sort_adjacencies(adjacencies: dict) -> list:
-    unsorted_adjacencies = list()
-
-    for this_colour_key, all_adjacents in adjacencies.items():
-        colour_RGBA = RGBA_from_colourKey(this_colour_key)
-
-        for this_adjacent_key in all_adjacents:
-            adjacent_RGBA = RGBA_from_colourKey(this_adjacent_key)
-
-            this_relation = relation_from_two_RGBAs(colour_RGBA, adjacent_RGBA)
-            unsorted_adjacencies.append(this_relation)
-
+def sort_adjacencies(adjacencies: set) -> list:
+    unsorted_adjacencies = list(adjacencies)
     return sorted(unsorted_adjacencies)
 
-sorted_adjacencies = sort_adjacencies(adjacencies)
+sorted_adjacencies = sort_adjacencies(all_adjacencies)
 
 # ##### STRINGIFY #####
 COLUMN_SEPARATOR = "\t"
