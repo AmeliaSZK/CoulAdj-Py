@@ -25,7 +25,6 @@ evaluate_size(){
 }
 
 echo "~~~ Profiling Sizes 1 to 512 ~~~"
-echo "Expect up to 6~12 minutes in total. (It's 10~11 on my machine)"
 echo "Each size should take ~4x longer than the previous."
 evaluate_size 1
 evaluate_size 2

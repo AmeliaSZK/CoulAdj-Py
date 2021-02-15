@@ -25,7 +25,6 @@ evaluate_size(){
 }
 
 echo "~~~ Profiling Sizes 8 to 64 ~~~"
-echo "Expect 6~12 seconds to do size 64"
 #evaluate_size 1
 #evaluate_size 2
 #evaluate_size 4
