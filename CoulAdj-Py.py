@@ -82,12 +82,6 @@ else:
 
 logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
 
-# ##### CONSTANTS #####
-TOP_OFFSET = -1
-BOT_OFFSET = 1
-LEF_OFFSET = -1
-RIG_OFFSET = 1
-
 # ##### CONVERSION FUNCTIONS #####
 # These followings are all different ways of representing the
 #   *same* pixel colour:
@@ -148,41 +142,46 @@ RIG_OFFSET = 1
 #   Sort, Stringify, & Write can also take shortcuts between each others,
 # But at the boundary, it MUST be the expected dict that is passed.
 #
-# Furthermore, while RGBA_from_colourKey may have been previously defined,
-#   the sections before the Boundary are responsible for making sure that the 
-#   correct conversion function has been assigned to RGBA_from_colourKey.
-#       (Yes, I know that have more than 1 responsible is asking for trouble,
-#       but as I am writing these lines, the new outline has not been 
-#       implemented yet so things will probably evolve.)
+# Furthermore, Import is responsible for assigning the correct functions
+#   to colourKey_from_pixelData and RGBA_from_colourKey
 
-def uintc_from_pixelData_rgbalpha(pixelData: np.ndarray):
-    r = pixelData[0] << 24
-    g = pixelData[1] << 16
-    b = pixelData[2] << 8
-    a = pixelData[3] << 0
-    return r + g + b + a
 
-def uintc_from_pixelData_rgb(pixelData: np.ndarray):
-    r = pixelData[0] << 24
-    g = pixelData[1] << 16
-    b = pixelData[2] << 8
-    a = 255
-    return r + g + b + a
-
-def RGBA_from_uintc(x):
-    r = x >> 24 & 0x000000FF
-    g = x >> 16 & 0x000000FF
-    b = x >> 8 & 0x000000FF
-    a = x >> 0 & 0x000000FF
+def tuple_from_pixelData_rgbalpha(pixelData: np.ndarray):
+    r = pixelData[0]
+    g = pixelData[1]
+    b = pixelData[2]
+    a = pixelData[3]
     return (r, g, b, a)
 
-def colourKey_from_pixelData(pixelData: np.ndarray):
-    return uintc_from_pixelData_rgbalpha(pixelData)
+def tuple_from_pixelData_rgb(pixelData: np.ndarray):
+    r = pixelData[0]
+    g = pixelData[1]
+    b = pixelData[2]
+    return (r, g, b)
+
+def RGBA_from_rgbalpha_tuple(colourKey):
+    r = colourKey[0]
+    g = colourKey[1]
+    b = colourKey[2]
+    a = colourKey[3]
+    return (r, g, b, a)
+
+def RGBA_from_rgb_tuple(colourKey):
+    r = colourKey[0]
+    g = colourKey[1]
+    b = colourKey[2]
+    a = 255
+    return (r, g, b, a)
+
 
 # ~~~ BOUNDARY ~~~
+def colourKey_from_pixelData(pixelData: np.ndarray):
+    pass
+
 def RGBA_from_colourKey(colourKey):
-    return RGBA_from_uintc(colourKey)
+    pass
 # ~~~ BOUNDARY ~~~
+
 
 def relation_from_two_RGBAs(rgba1, rgba2):
     return (rgba1, rgba2)
@@ -206,7 +205,6 @@ def alp_from_RGBA(rgba):
     return rgba[3]
 
 
-
 # ##### INPUTS #####
 source = args.image
 destination = args.results
@@ -214,35 +212,26 @@ relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
 # ##### IMPORT #####
-source_image = imageio.imread(source)
-height = source_image.shape[0]
-width = source_image.shape[1]
-nbChannels = source_image.shape[2]
-logging.debug("source_image.shape = {}".format(source_image.shape))
-logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
+image = imageio.imread(source)
+height = image.shape[0]
+width = image.shape[1]
+nbChannels = image.shape[2]
+pixelFormat = image.dtype
+logging.debug("image.shape = {}".format(image.shape))
+logging.info("Height: {}, Width: {}, {} channels, Pixel format: {}".format(height, width, nbChannels, pixelFormat))
+
+# TODO:
+# np.issubtype https://numpy.org/doc/stable/reference/generated/numpy.issubdtype.html#numpy.issubdtype
+# Get maxes: https://numpy.org/doc/stable/reference/routines.dtype.html#data-type-information
 
 if nbChannels == 3:
-    colourKey_from_pixelData = uintc_from_pixelData_rgb
+    colourKey_from_pixelData = tuple_from_pixelData_rgb
+    RGBA_from_colourKey = RGBA_from_rgb_tuple
 elif nbChannels == 4:
-    colourKey_from_pixelData = uintc_from_pixelData_rgbalpha
+    colourKey_from_pixelData = tuple_from_pixelData_rgbalpha
+    RGBA_from_colourKey = RGBA_from_rgbalpha_tuple
 else:
     raise TypeError("Image must have 3 or 4 channels")
-
-nbRows = height
-nbCols = width
-maxRow = nbRows - 1
-maxCol = nbCols -1
-logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
-    .format(nbRows, nbCols, maxRow, maxCol))
-topRow = 0
-botRow = maxRow
-lefCol = 0
-rigCol = maxCol
-logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
-    .format(topRow, botRow, lefCol, rigCol))
-
-image = source_image
-logging.debug("image.shape = {}".format(image.shape))
 
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
@@ -250,44 +239,63 @@ adjacencies = dict()
 def batch_process(all_pixels, all_neighs):
     # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
     # (with modifications)
+    start = time.perf_counter()
+
     diffs = (all_pixels != all_neighs).any(axis=2)
+    
+    end_comp = time.perf_counter()
+    
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
+    
+    end_list = time.perf_counter()
 
-    for pair in zip(diff_pixels, diff_neighs):
-        pixelColour = colourKey_from_pixelData(pair[0])
-        neighColour = colourKey_from_pixelData(pair[1])
+    zipped = zip(diff_pixels, diff_neighs)
+    unique = {
+        (colourKey_from_pixelData(pair[0]), 
+        colourKey_from_pixelData(pair[1])) 
+        for pair in zipped
+        }
+    
+    end_purge = time.perf_counter()
+
+    for pair in unique:
+        pixelColour = pair[0]
+        neighColour = pair[1]
         adjacencies.setdefault(pixelColour, set()).add(neighColour)
         adjacencies.setdefault(neighColour, set()).add(pixelColour)
+    
+    end_register = time.perf_counter()
+
+    duration_comp = round(end_comp - start, 6)
+    duration_list = round(end_list - end_comp, 6)
+    duration_purge = round(end_purge - end_list, 6)
+    duration_regi = round(end_register - end_purge, 6)
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Purging: {duration_purge}, Registering: {duration_regi}")
 
     return
 
 bot_pixels = image[0:-1, :]
 bot_neighs = image[1:  , :]
-
 rig_pixels = image[:, 0:-1]
 rig_neighs = image[:, 1:]
 
 bot_rig_pixels = image[0:-1, 0:-1]
 bot_rig_neighs = image[1:  , 1:]
-
 top_rig_pixels = image[1:  , 0:-1]
 top_rig_neighs = image[0:-1, 1:]
 
-logging.debug("bot_pixels.shape = {}".format(bot_pixels.shape))
-logging.debug("bot_neighs.shape = {}".format(bot_neighs.shape))
-logging.debug("rig_pixels.shape = {}".format(rig_pixels.shape))
-logging.debug("rig_neighs.shape = {}".format(rig_neighs.shape))
-logging.debug("bot_rig_pixels.shape = {}".format(bot_rig_pixels.shape))
-logging.debug("bot_rig_neighs.shape = {}".format(bot_rig_neighs.shape))
-logging.debug("top_rig_pixels.shape = {}".format(top_rig_pixels.shape))
-logging.debug("top_rig_neighs.shape = {}".format(top_rig_neighs.shape))
+start_process = time.perf_counter()
 
 batch_process(bot_pixels, bot_neighs)
 batch_process(rig_pixels, rig_neighs)
 if relateDiagonals:
     batch_process(bot_rig_pixels, bot_rig_neighs)
     batch_process(top_rig_pixels, top_rig_neighs)
+
+end_process = time.perf_counter()
+duration_process = round(end_process - start_process, 6)
+logging.debug(f"Processing took {duration_process}s")
 
 # ##### SORT #####
 def sort_adjacencies(adjacencies: dict) -> list:

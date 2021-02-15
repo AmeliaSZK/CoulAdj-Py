@@ -20,3 +20,14 @@ Func	0.500*	Removed 1 indirection for conversion functions
 Func2	0.499*	Reverted to Consts2
 Comp1	0.097*	No conversion, but use of (a != b).any(axis=2) to compare
 Clean2	0.099*	Removed obsolete timer. (I worried it was affecting measurements)
+BaseP	20.4	New baseline. Input is the proprietary warhammer_map_1_1_shadow.bmp
+Func3	20.7	Skipped intermediary variables in colourKey_from_pixelData
+Func4	21.0	Reverted to BaseP
+Tupl	6.07	Now using tuples to store colour keys
+Tupl2	5.71	Skipped intermediary variables (yes, again)
+Tupl3	5.68	Reverted to Tupl. Skipping intermediary variables definitely useless
+Tupl4	5.63	RGB (no alpha) tuples now have only 3 items
+Meas	5.71	Added measurments during batch_process
+Purge	5.17	Purge duplicate relations before trying to register them
+Clean3	5.17	Removed dead code
+Clean4	5.20	Removed non-useful measurements. (Of 5.20s, 5.07 was spent in Processing)
