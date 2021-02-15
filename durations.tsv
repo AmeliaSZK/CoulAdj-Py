@@ -31,3 +31,7 @@ Meas	5.71	Added measurments during batch_process
 Purge	5.17	Purge duplicate relations before trying to register them
 Clean3	5.17	Removed dead code
 Clean4	5.20	Removed non-useful measurements. (Of 5.20s, 5.07 was spent in Processing)
+Set	5.65	Use set of relations instead of dictionary of sets
+Purge2	5.12	Pre-purges duplicates
+PreThre	5.34	Separated collector sets
+Thread	3.42	Enabled multiprocessing
