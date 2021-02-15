@@ -169,12 +169,30 @@ def uintc_from_pixelData_rgb(pixelData: np.ndarray):
     a = 255
     return r + g + b + a
 
+def tuple_from_pixelData_rgbalpha(pixelData: np.ndarray):
+    r = pixelData[0]
+    g = pixelData[1]
+    b = pixelData[2]
+    a = pixelData[3]
+    return (r, g, b, a)
+
+def tuple_from_pixelData_rgb(pixelData: np.ndarray):
+    r = pixelData[0]
+    g = pixelData[1]
+    b = pixelData[2]
+    a = 255
+    return (r, g, b, a)
+
+
 def RGBA_from_uintc(x):
     r = x >> 24 & 0x000000FF
     g = x >> 16 & 0x000000FF
     b = x >> 8 & 0x000000FF
     a = x >> 0 & 0x000000FF
     return (r, g, b, a)
+
+def RGBA_from_tuple(x):
+    return x
 
 def colourKey_from_pixelData(pixelData: np.ndarray):
     return uintc_from_pixelData_rgbalpha(pixelData)
@@ -222,9 +240,11 @@ logging.debug("source_image.shape = {}".format(source_image.shape))
 logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
 
 if nbChannels == 3:
-    colourKey_from_pixelData = uintc_from_pixelData_rgb
+    colourKey_from_pixelData = tuple_from_pixelData_rgb
+    RGBA_from_colourKey = RGBA_from_tuple
 elif nbChannels == 4:
-    colourKey_from_pixelData = uintc_from_pixelData_rgbalpha
+    colourKey_from_pixelData = tuple_from_pixelData_rgbalpha
+    RGBA_from_colourKey = RGBA_from_tuple
 else:
     raise TypeError("Image must have 3 or 4 channels")
 
