@@ -253,9 +253,15 @@ def batch_process(adjacencies, all_pixels, all_neighs):
     
     end_list = time.perf_counter()
 
-    for pair in zip(diff_pixels, diff_neighs):
-        pixelColour = RGBA_from_colourKey(pair[0])
-        neighColour = RGBA_from_colourKey(pair[1])
+    unique = {
+        (RGBA_from_colourKey(pair[0]), 
+        RGBA_from_colourKey(pair[1])) 
+        for pair in zip(diff_pixels, diff_neighs)
+        }
+
+    for pair in unique:
+        pixelColour = pair[0]
+        neighColour = pair[1]
         adjacencies.add(relation_from_two_RGBAs(pixelColour, neighColour))
         adjacencies.add(relation_from_two_RGBAs(neighColour, pixelColour))
     
