@@ -281,15 +281,29 @@ adjacencies = dict()
 def batch_process(all_pixels, all_neighs):
     # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
     # (with modifications)
+    start = time.perf_counter()
+
     diffs = (all_pixels != all_neighs).any(axis=2)
+    
+    end_comp = time.perf_counter()
+    
     diff_pixels = all_pixels[diffs]
     diff_neighs = all_neighs[diffs]
+    
+    end_list = time.perf_counter()
 
     for pair in zip(diff_pixels, diff_neighs):
         pixelColour = colourKey_from_pixelData(pair[0])
         neighColour = colourKey_from_pixelData(pair[1])
         adjacencies.setdefault(pixelColour, set()).add(neighColour)
         adjacencies.setdefault(neighColour, set()).add(pixelColour)
+    
+    end_register = time.perf_counter()
+
+    duration_comp = round(end_comp - start, 6)
+    duration_list = round(end_list - end_comp, 6)
+    duration_regi = round(end_register - end_list, 6)
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Registering: {duration_regi}")
 
     return
 
