@@ -255,6 +255,8 @@ def batch_process(all_pixels, all_neighs):
         for pair in zip(diff_pixels, diff_neighs)
         }
 
+    end_conv = time.perf_counter()
+
     adjacencies = set()
     for pair in unique:
         pixelColour = pair[0]
@@ -266,8 +268,9 @@ def batch_process(all_pixels, all_neighs):
 
     duration_comp = round(end_comp - start, 6)
     duration_list = round(end_list - end_comp, 6)
-    duration_regi = round(end_register - end_list, 6)
-    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Registering: {duration_regi}")
+    duration_conv = round(end_conv - end_list, 6)
+    duration_regi = round(end_register - end_conv, 6)
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Converting: {duration_conv}, Registering: {duration_regi}")
 
     return adjacencies
 
@@ -293,9 +296,18 @@ with concurrent.futures.ProcessPoolExecutor() as executor:
     if relateDiagonals:
         results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs))
         results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs))
-
+    
+    duration_union = 0
     for f in concurrent.futures.as_completed(results):
+        start_union = time.perf_counter()
+        
         all_adjacencies |= f.result()
+        
+        end_union = time.perf_counter()
+        duration_union += (end_union - start_union)
+
+    duration_union = round(duration_union, 6)
+    logging.debug(f"Union of sub-sets took {duration_union}s")
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
