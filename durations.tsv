@@ -29,3 +29,4 @@ Tupl3	5.68	Reverted to Tupl. Skipping intermediary variables definitely useless
 Tupl4	5.63	RGB (no alpha) tuples now have only 3 items
 Meas	5.71	Added measurments during batch_process
 Purge	5.17	Purge duplicate relations before trying to register them
+Clean3	5.17	Removed dead code

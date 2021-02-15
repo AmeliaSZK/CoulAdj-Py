@@ -82,12 +82,6 @@ else:
 
 logging.basicConfig(encoding='utf-8', format='%(levelname)s:%(message)s', level=loglevel)
 
-# ##### CONSTANTS #####
-TOP_OFFSET = -1
-BOT_OFFSET = 1
-LEF_OFFSET = -1
-RIG_OFFSET = 1
-
 # ##### CONVERSION FUNCTIONS #####
 # These followings are all different ways of representing the
 #   *same* pixel colour:
@@ -148,33 +142,9 @@ RIG_OFFSET = 1
 #   Sort, Stringify, & Write can also take shortcuts between each others,
 # But at the boundary, it MUST be the expected dict that is passed.
 #
-# Furthermore, while RGBA_from_colourKey may have been previously defined,
-#   the sections before the Boundary are responsible for making sure that the 
-#   correct conversion function has been assigned to RGBA_from_colourKey.
-#       (Yes, I know that have more than 1 responsible is asking for trouble,
-#       but as I am writing these lines, the new outline has not been 
-#       implemented yet so things will probably evolve.)
+# Furthermore, Import is responsible for assigning the correct functions
+#   to colourKey_from_pixelData and RGBA_from_colourKey
 
-def uintc_from_pixelData_rgbalpha(pixelData: np.ndarray):
-    r = pixelData[0] << 24
-    g = pixelData[1] << 16
-    b = pixelData[2] << 8
-    a = pixelData[3] << 0
-    return r + g + b + a
-
-def uintc_from_pixelData_rgb(pixelData: np.ndarray):
-    r = pixelData[0] << 24
-    g = pixelData[1] << 16
-    b = pixelData[2] << 8
-    a = 255
-    return r + g + b + a
-
-def RGBA_from_uintc(colourKey):
-    r = colourKey >> 24 & 0x000000FF
-    g = colourKey >> 16 & 0x000000FF
-    b = colourKey >> 8 & 0x000000FF
-    a = colourKey >> 0 & 0x000000FF
-    return (r, g, b, a)
 
 def tuple_from_pixelData_rgbalpha(pixelData: np.ndarray):
     r = pixelData[0]
@@ -235,7 +205,6 @@ def alp_from_RGBA(rgba):
     return rgba[3]
 
 
-
 # ##### INPUTS #####
 source = args.image
 destination = args.results
@@ -243,12 +212,13 @@ relateDiagonals = not args.dontRelateDiagonals
 logging.info("Starting")
 
 # ##### IMPORT #####
-source_image = imageio.imread(source)
-height = source_image.shape[0]
-width = source_image.shape[1]
-nbChannels = source_image.shape[2]
-logging.debug("source_image.shape = {}".format(source_image.shape))
-logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChannels))
+image = imageio.imread(source)
+height = image.shape[0]
+width = image.shape[1]
+nbChannels = image.shape[2]
+pixelFormat = image.dtype
+logging.debug("image.shape = {}".format(image.shape))
+logging.info("Height: {}, Width: {}, {} channels, Pixel format: {}".format(height, width, nbChannels, pixelFormat))
 
 if nbChannels == 3:
     colourKey_from_pixelData = tuple_from_pixelData_rgb
@@ -258,22 +228,6 @@ elif nbChannels == 4:
     RGBA_from_colourKey = RGBA_from_rgbalpha_tuple
 else:
     raise TypeError("Image must have 3 or 4 channels")
-
-nbRows = height
-nbCols = width
-maxRow = nbRows - 1
-maxCol = nbCols -1
-logging.debug("nbRows={}, nbColumns={}, maxRow={}, maxColumn={}"
-    .format(nbRows, nbCols, maxRow, maxCol))
-topRow = 0
-botRow = maxRow
-lefCol = 0
-rigCol = maxCol
-logging.debug("topRow={}, botRow={}, lefCol={}, rigCol={}"
-    .format(topRow, botRow, lefCol, rigCol))
-
-image = source_image
-logging.debug("image.shape = {}".format(image.shape))
 
 # ##### CALCULATE ADJACENCIES #####
 adjacencies = dict()
@@ -294,9 +248,9 @@ def batch_process(all_pixels, all_neighs):
 
     zipped = zip(diff_pixels, diff_neighs)
     unique = {
-        (colourKey_from_pixelData(p[0]), 
-        colourKey_from_pixelData(p[1])) 
-        for p in zipped
+        (colourKey_from_pixelData(pair[0]), 
+        colourKey_from_pixelData(pair[1])) 
+        for pair in zipped
         }
     
     end_purge = time.perf_counter()
@@ -328,15 +282,6 @@ bot_rig_neighs = image[1:  , 1:]
 
 top_rig_pixels = image[1:  , 0:-1]
 top_rig_neighs = image[0:-1, 1:]
-
-logging.debug("bot_pixels.shape = {}".format(bot_pixels.shape))
-logging.debug("bot_neighs.shape = {}".format(bot_neighs.shape))
-logging.debug("rig_pixels.shape = {}".format(rig_pixels.shape))
-logging.debug("rig_neighs.shape = {}".format(rig_neighs.shape))
-logging.debug("bot_rig_pixels.shape = {}".format(bot_rig_pixels.shape))
-logging.debug("bot_rig_neighs.shape = {}".format(bot_rig_neighs.shape))
-logging.debug("top_rig_pixels.shape = {}".format(top_rig_pixels.shape))
-logging.debug("top_rig_neighs.shape = {}".format(top_rig_neighs.shape))
 
 start_process = time.perf_counter()
 
