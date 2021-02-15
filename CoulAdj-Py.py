@@ -273,13 +273,11 @@ def batch_process(all_pixels, all_neighs):
 
 bot_pixels = image[0:-1, :]
 bot_neighs = image[1:  , :]
-
 rig_pixels = image[:, 0:-1]
 rig_neighs = image[:, 1:]
 
 bot_rig_pixels = image[0:-1, 0:-1]
 bot_rig_neighs = image[1:  , 1:]
-
 top_rig_pixels = image[1:  , 0:-1]
 top_rig_neighs = image[0:-1, 1:]
 
@@ -310,13 +308,7 @@ def sort_adjacencies(adjacencies: dict) -> list:
 
     return sorted(unsorted_adjacencies)
 
-start_sort = time.perf_counter()
-
 sorted_adjacencies = sort_adjacencies(adjacencies)
-
-end_sort = time.perf_counter()
-duration_sort = round(end_sort - start_sort, 6)
-logging.debug(f"Sorting took {duration_sort}s")
 
 # ##### STRINGIFY #####
 COLUMN_SEPARATOR = "\t"
@@ -368,22 +360,10 @@ def stringify(sorted_adjacencies):
     conform_to_tsv_specifications = joined_lines + "\n"
     return conform_to_tsv_specifications
 
-start_stringify = time.perf_counter()
-
 stringyfied = stringify(sorted_adjacencies)
 
-end_stringify = time.perf_counter()
-duration_stringify = round(end_stringify - start_stringify, 6)
-logging.debug(f"Stringifying took {duration_stringify}s")
-
 # ##### WRITE #####
-start_write = time.perf_counter()
-
 destination.write(stringyfied)
-
-end_write = time.perf_counter()
-duration_write = round(end_write - start_write, 6)
-logging.debug(f"Writing took {duration_write}s")
 
 # ##### EPILOGUE #####
 endTime = time.perf_counter()
