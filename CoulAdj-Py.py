@@ -170,18 +170,18 @@ def uintc_from_pixelData_rgb(pixelData: np.ndarray):
     return r + g + b + a
 
 def tuple_from_pixelData_rgbalpha(pixelData: np.ndarray):
-    r = pixelData[0]
-    g = pixelData[1]
-    b = pixelData[2]
-    a = pixelData[3]
-    return (r, g, b, a)
+    #r = pixelData[0]
+    #g = pixelData[1]
+    #b = pixelData[2]
+    #a = pixelData[3]
+    return (pixelData[0], pixelData[1], pixelData[2], pixelData[3])
 
 def tuple_from_pixelData_rgb(pixelData: np.ndarray):
-    r = pixelData[0]
-    g = pixelData[1]
-    b = pixelData[2]
-    a = 255
-    return (r, g, b, a)
+    #r = pixelData[0]
+    #g = pixelData[1]
+    #b = pixelData[2]
+    #a = 255
+    return (pixelData[0], pixelData[1], pixelData[2], 255)
 
 
 def RGBA_from_uintc(x):

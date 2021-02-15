@@ -24,3 +24,4 @@ BaseP	20.4	New baseline. Input is the proprietary warhammer_map_1_1_shadow.bmp
 Func3	20.7	Skipped intermediary variables in colourKey_from_pixelData
 Func4	21.0	Reverted to BaseP
 Tupl	6.07	Now using tuples to store colour keys
+Tupl2	5.71	Skipped intermediary variables (yes, again)
