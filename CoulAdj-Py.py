@@ -233,11 +233,6 @@ else:
     raise TypeError("Image must have 3 or 4 channels")
 
 # ##### CALCULATE ADJACENCIES #####
-all_adjacencies = set()
-adjacencies_bottom = set()
-adjacencies_right = set()
-adjacencies_bottom_right = set()
-adjacencies_top_right = set()
 
 def batch_process(adjacencies, all_pixels, all_neighs):
     # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
@@ -274,6 +269,12 @@ def batch_process(adjacencies, all_pixels, all_neighs):
 
     return
 
+all_adjacencies = set()
+adjacencies_bottom = set()
+adjacencies_right = set()
+adjacencies_bottom_right = set()
+adjacencies_top_right = set()
+
 bot_pixels = image[0:-1, :]
 bot_neighs = image[1:  , :]
 rig_pixels = image[:, 0:-1]
@@ -286,11 +287,16 @@ top_rig_neighs = image[0:-1, 1:]
 
 start_process = time.perf_counter()
 
-batch_process(all_adjacencies, bot_pixels, bot_neighs)
-batch_process(all_adjacencies, rig_pixels, rig_neighs)
+batch_process(adjacencies_bottom, bot_pixels, bot_neighs)
+batch_process(adjacencies_right, rig_pixels, rig_neighs)
 if relateDiagonals:
-    batch_process(all_adjacencies, bot_rig_pixels, bot_rig_neighs)
-    batch_process(all_adjacencies, top_rig_pixels, top_rig_neighs)
+    batch_process(adjacencies_bottom_right, bot_rig_pixels, bot_rig_neighs)
+    batch_process(adjacencies_top_right, top_rig_pixels, top_rig_neighs)
+
+all_adjacencies |= adjacencies_bottom
+all_adjacencies |= adjacencies_right
+all_adjacencies |= adjacencies_bottom_right
+all_adjacencies |= adjacencies_top_right
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
