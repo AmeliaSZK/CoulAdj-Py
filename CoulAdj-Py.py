@@ -270,7 +270,7 @@ def batch_process(all_pixels, all_neighs):
     duration_list = round(end_list - end_comp, 6)
     duration_conv = round(end_conv - end_list, 6)
     duration_regi = round(end_register - end_conv, 6)
-    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Converting: {duration_conv}, Registering: {duration_regi}")
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Converting: {duration_conv}, Registering: {duration_regi}. {len(adjacencies)} relations in this subset")
 
     return adjacencies
 
