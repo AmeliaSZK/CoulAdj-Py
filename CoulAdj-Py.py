@@ -21,6 +21,7 @@ import argparse
 import time
 import logging
 import sys
+import concurrent.futures
 
 version = "0.1"
 
@@ -234,7 +235,7 @@ else:
 
 # ##### CALCULATE ADJACENCIES #####
 
-def batch_process(adjacencies, all_pixels, all_neighs):
+def batch_process(all_pixels, all_neighs):
     # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
     # (with modifications)
     start = time.perf_counter()
@@ -254,6 +255,7 @@ def batch_process(adjacencies, all_pixels, all_neighs):
         for pair in zip(diff_pixels, diff_neighs)
         }
 
+    adjacencies = set()
     for pair in unique:
         pixelColour = pair[0]
         neighColour = pair[1]
@@ -267,13 +269,9 @@ def batch_process(adjacencies, all_pixels, all_neighs):
     duration_regi = round(end_register - end_list, 6)
     logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Registering: {duration_regi}")
 
-    return
+    return adjacencies
 
 all_adjacencies = set()
-adjacencies_bottom = set()
-adjacencies_right = set()
-adjacencies_bottom_right = set()
-adjacencies_top_right = set()
 
 bot_pixels = image[0:-1, :]
 bot_neighs = image[1:  , :]
@@ -287,16 +285,17 @@ top_rig_neighs = image[0:-1, 1:]
 
 start_process = time.perf_counter()
 
-batch_process(adjacencies_bottom, bot_pixels, bot_neighs)
-batch_process(adjacencies_right, rig_pixels, rig_neighs)
-if relateDiagonals:
-    batch_process(adjacencies_bottom_right, bot_rig_pixels, bot_rig_neighs)
-    batch_process(adjacencies_top_right, top_rig_pixels, top_rig_neighs)
+with concurrent.futures.ProcessPoolExecutor() as executor:
+    results = [
+        executor.submit(batch_process, bot_pixels, bot_neighs),
+        executor.submit(batch_process, rig_pixels, rig_neighs)
+    ]
+    if relateDiagonals:
+        results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs))
+        results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs))
 
-all_adjacencies |= adjacencies_bottom
-all_adjacencies |= adjacencies_right
-all_adjacencies |= adjacencies_bottom_right
-all_adjacencies |= adjacencies_top_right
+    for f in concurrent.futures.as_completed(results):
+        all_adjacencies |= f.result()
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
