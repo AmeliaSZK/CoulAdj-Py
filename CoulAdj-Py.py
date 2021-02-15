@@ -220,6 +220,10 @@ pixelFormat = image.dtype
 logging.debug("image.shape = {}".format(image.shape))
 logging.info("Height: {}, Width: {}, {} channels, Pixel format: {}".format(height, width, nbChannels, pixelFormat))
 
+# TODO:
+# np.issubtype https://numpy.org/doc/stable/reference/generated/numpy.issubdtype.html#numpy.issubdtype
+# Get maxes: https://numpy.org/doc/stable/reference/routines.dtype.html#data-type-information
+
 if nbChannels == 3:
     colourKey_from_pixelData = tuple_from_pixelData_rgb
     RGBA_from_colourKey = RGBA_from_rgb_tuple
