@@ -169,6 +169,13 @@ def uintc_from_pixelData_rgb(pixelData: np.ndarray):
     a = 255
     return r + g + b + a
 
+def RGBA_from_uintc(colourKey):
+    r = colourKey >> 24 & 0x000000FF
+    g = colourKey >> 16 & 0x000000FF
+    b = colourKey >> 8 & 0x000000FF
+    a = colourKey >> 0 & 0x000000FF
+    return (r, g, b, a)
+
 def tuple_from_pixelData_rgbalpha(pixelData: np.ndarray):
     r = pixelData[0]
     g = pixelData[1]
@@ -180,27 +187,31 @@ def tuple_from_pixelData_rgb(pixelData: np.ndarray):
     r = pixelData[0]
     g = pixelData[1]
     b = pixelData[2]
-    a = 255
-    return (r, g, b, 255)
+    return (r, g, b)
 
-
-def RGBA_from_uintc(x):
-    r = x >> 24 & 0x000000FF
-    g = x >> 16 & 0x000000FF
-    b = x >> 8 & 0x000000FF
-    a = x >> 0 & 0x000000FF
+def RGBA_from_rgbalpha_tuple(colourKey):
+    r = colourKey[0]
+    g = colourKey[1]
+    b = colourKey[2]
+    a = colourKey[3]
     return (r, g, b, a)
 
-def RGBA_from_tuple(x):
-    return x
+def RGBA_from_rgb_tuple(colourKey):
+    r = colourKey[0]
+    g = colourKey[1]
+    b = colourKey[2]
+    a = 255
+    return (r, g, b, a)
 
+
+# ~~~ BOUNDARY ~~~
 def colourKey_from_pixelData(pixelData: np.ndarray):
-    return uintc_from_pixelData_rgbalpha(pixelData)
+    pass
 
-# ~~~ BOUNDARY ~~~
 def RGBA_from_colourKey(colourKey):
-    return RGBA_from_uintc(colourKey)
+    pass
 # ~~~ BOUNDARY ~~~
+
 
 def relation_from_two_RGBAs(rgba1, rgba2):
     return (rgba1, rgba2)
@@ -241,10 +252,10 @@ logging.info("Height = {}, Width = {}, {} channels".format(height, width, nbChan
 
 if nbChannels == 3:
     colourKey_from_pixelData = tuple_from_pixelData_rgb
-    RGBA_from_colourKey = RGBA_from_tuple
+    RGBA_from_colourKey = RGBA_from_rgb_tuple
 elif nbChannels == 4:
     colourKey_from_pixelData = tuple_from_pixelData_rgbalpha
-    RGBA_from_colourKey = RGBA_from_tuple
+    RGBA_from_colourKey = RGBA_from_rgbalpha_tuple
 else:
     raise TypeError("Image must have 3 or 4 channels")
 

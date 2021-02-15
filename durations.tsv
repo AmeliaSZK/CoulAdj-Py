@@ -26,3 +26,4 @@ Func4	21.0	Reverted to BaseP
 Tupl	6.07	Now using tuples to store colour keys
 Tupl2	5.71	Skipped intermediary variables (yes, again)
 Tupl3	5.68	Reverted to Tupl. Skipping intermediary variables definitely useless
+Tupl4	5.63	RGB (no alpha) tuples now have only 3 items
