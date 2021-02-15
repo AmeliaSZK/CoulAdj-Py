@@ -292,9 +292,18 @@ def batch_process(all_pixels, all_neighs):
     
     end_list = time.perf_counter()
 
-    for pair in zip(diff_pixels, diff_neighs):
-        pixelColour = colourKey_from_pixelData(pair[0])
-        neighColour = colourKey_from_pixelData(pair[1])
+    zipped = zip(diff_pixels, diff_neighs)
+    unique = {
+        (colourKey_from_pixelData(p[0]), 
+        colourKey_from_pixelData(p[1])) 
+        for p in zipped
+        }
+    
+    end_purge = time.perf_counter()
+
+    for pair in unique:
+        pixelColour = pair[0]
+        neighColour = pair[1]
         adjacencies.setdefault(pixelColour, set()).add(neighColour)
         adjacencies.setdefault(neighColour, set()).add(pixelColour)
     
@@ -302,8 +311,9 @@ def batch_process(all_pixels, all_neighs):
 
     duration_comp = round(end_comp - start, 6)
     duration_list = round(end_list - end_comp, 6)
-    duration_regi = round(end_register - end_list, 6)
-    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Registering: {duration_regi}")
+    duration_purge = round(end_purge - end_list, 6)
+    duration_regi = round(end_register - end_purge, 6)
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Purging: {duration_purge}, Registering: {duration_regi}")
 
     return
 
