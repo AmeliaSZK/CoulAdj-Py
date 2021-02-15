@@ -26,8 +26,9 @@ and documentation.
         it with the active environment in parenthesis._
 
 # Known limitations
-*   Max of 8 bits per channel
-*   Minimum dimensions of 3x3 pixels
+*   8 bits per channel
+*   Minimum dimensions of 3x3 pixels 
+    * Probably. Images with dimension(s) of less than 3 pixels weren't tested.
 
 # How to run
 
@@ -220,6 +221,11 @@ Will test a few small consecutive sizes, with only one run per size.
 * If you have less, I expect one of these to be true:
     * The test script(s) and/or program is very broken 😶
     * You're a genius, please please please tell me how you did it 👀 🎉
+
+    _Epilogue: It happened, nothing is broken,
+    and I don't understand how it went sub-linear. See commit 03d8d99._
+    _I did it by not converting the whole image at the start, and by
+    using `.any(axis=2)` to do the comparisons. [Take a look at the diff](https://github.com/AmeliaSZK/CoulAdj-Py/commit/03d8d992aa46069fb7a1406e0bcb2639233e22d0)._
 * **At `O(n)`, each size takes about 4 times longer than the previous size**
 
 ```
@@ -285,6 +291,7 @@ Truncate durations to 4 digits before calculating & recording ratios.
   "Recording ratios" means to write them in all_sizes.tsv
 (CoulAdj-Py) $
 ```
+_(The example is outdated, and now it takes about 8 seconds on my machine)_
 
 ### Calculation example
 With the example above, this is how you would calculate what to record in `all_sizes.tsv`:
