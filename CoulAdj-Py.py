@@ -235,10 +235,14 @@ else:
 
 # ##### CALCULATE ADJACENCIES #####
 
-def batch_process(all_pixels, all_neighs):
+def batch_process(all_pixels, all_neighs, batch_name=None):
     # Based on https://stackoverflow.com/a/50910650 by Jan Christoph Terasa
     # (with modifications)
     start = time.perf_counter()
+    if batch_name is not None:
+        batch_name = f'({batch_name})'
+    else:
+        batch_name = ''
 
     diffs = (all_pixels != all_neighs).any(axis=2)
     
@@ -264,10 +268,12 @@ def batch_process(all_pixels, all_neighs):
     #   [4, 5, 6, 10, 11, 12]
     # ]
     end_zipp = time.perf_counter()
+    nb_zipp = zipped.size
 
     unique = np.unique(zipped, axis=0)
 
     end_uniq = time.perf_counter()
+    nb_uniq = unique.size
 
     adjacencies = set()
     for pair in unique:
@@ -277,6 +283,7 @@ def batch_process(all_pixels, all_neighs):
         adjacencies.add(relation_from_two_RGBAs(neighColour, pixelColour))
     
     end_register = time.perf_counter()
+    nb_adja = len(adjacencies)
 
     duration_comp = round(end_comp - start, 4)
     duration_list = round(end_list - end_comp, 4)
@@ -284,7 +291,16 @@ def batch_process(all_pixels, all_neighs):
     duration_uniq = round(end_uniq - end_zipp, 4)
     duration_regi = round(end_register - end_uniq, 4)
     duration_tot = round(end_register - start, 4)
-    logging.debug(f"{duration_tot:4}s total. Comparing: {duration_comp:4}s, Listing: {duration_list:4}, Zipping: {duration_zipp:4}, Purging: {duration_uniq:4}, Registering: {duration_regi:4}. {len(adjacencies)} relations in this subset")
+    logging.debug(
+        f"{duration_tot:0<6}s total."\
+            f" Comparing: {duration_comp:0<6}"\
+            f", Listing: {duration_list:0<6}"\
+            f", Zipping: {duration_zipp:0<6}"\
+            f", Purging: {duration_uniq:0<6}"\
+            f", Registering: {duration_regi:0<6}." \
+            f" {nb_zipp:,} zipped, {nb_uniq} uniques, {nb_adja} relations."\
+            f" {batch_name}"
+        )
 
     return adjacencies
 
@@ -304,12 +320,12 @@ start_process = time.perf_counter()
 
 with concurrent.futures.ThreadPoolExecutor() as executor:
     results = [
-        executor.submit(batch_process, bot_pixels, bot_neighs),
-        executor.submit(batch_process, rig_pixels, rig_neighs)
+        executor.submit(batch_process, bot_pixels, bot_neighs, 'Bottom'),
+        executor.submit(batch_process, rig_pixels, rig_neighs, 'Right')
     ]
     if relateDiagonals:
-        results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs))
-        results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs))
+        results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs, 'Bottom Right'))
+        results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs, 'Top Right'))
     
     end_setup = time.perf_counter()
 
@@ -327,7 +343,7 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
     duration_setup = round(end_setup - start_process, 4)
     duration_join = round(end_join - end_setup, 4)
     duration_union = round(duration_union, 4)
-    logging.debug(f"Setup: {duration_setup:4}s, Join: {duration_join:4}s, Union: {duration_union:4}s")
+    logging.debug(f"Setup: {duration_setup}s, Join: {duration_join}s, Union: {duration_union}s")
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
