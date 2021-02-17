@@ -36,3 +36,4 @@ Purge2	5.12	Pre-purges duplicates
 PreThre	5.34	Separated collector sets
 Thread	3.42	Enabled multiprocessing
 NpUniq	2.53	Now using np.hstack and np.unique pour zipping and pre-purging duplicates
+Thread2	1.06	Use of ThreadPoolExecutor instead of ProcessPoolExecutor

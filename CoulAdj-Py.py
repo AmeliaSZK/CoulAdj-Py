@@ -302,7 +302,7 @@ top_rig_neighs = image[0:-1, 1:]
 
 start_process = time.perf_counter()
 
-with concurrent.futures.ProcessPoolExecutor() as executor:
+with concurrent.futures.ThreadPoolExecutor() as executor:
     results = [
         executor.submit(batch_process, bot_pixels, bot_neighs),
         executor.submit(batch_process, rig_pixels, rig_neighs)
