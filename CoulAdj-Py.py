@@ -283,7 +283,8 @@ def batch_process(all_pixels, all_neighs):
     duration_zipp = round(end_zipp - end_list, 4)
     duration_uniq = round(end_uniq - end_zipp, 4)
     duration_regi = round(end_register - end_uniq, 4)
-    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Zipping: {duration_zipp}, Purging: {duration_uniq}, Registering: {duration_regi}. {len(adjacencies)} relations in this subset")
+    duration_tot = round(end_register - start, 4)
+    logging.debug(f"{duration_tot:4}s total. Comparing: {duration_comp:4}s, Listing: {duration_list:4}, Zipping: {duration_zipp:4}, Purging: {duration_uniq:4}, Registering: {duration_regi:4}. {len(adjacencies)} relations in this subset")
 
     return adjacencies
 
@@ -310,6 +311,8 @@ with concurrent.futures.ProcessPoolExecutor() as executor:
         results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs))
         results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs))
     
+    end_setup = time.perf_counter()
+
     duration_union = 0
     for f in concurrent.futures.as_completed(results):
         start_union = time.perf_counter()
@@ -318,9 +321,13 @@ with concurrent.futures.ProcessPoolExecutor() as executor:
         
         end_union = time.perf_counter()
         duration_union += (end_union - start_union)
+    
+    end_join = time.perf_counter()
 
-    duration_union = round(duration_union, 6)
-    logging.debug(f"Union of sub-sets took {duration_union}s")
+    duration_setup = round(end_setup - start_process, 4)
+    duration_join = round(end_join - end_setup, 4)
+    duration_union = round(duration_union, 4)
+    logging.debug(f"Setup: {duration_setup:4}s, Join: {duration_join:4}s, Union: {duration_union:4}s")
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
