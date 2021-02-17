@@ -249,28 +249,41 @@ def batch_process(all_pixels, all_neighs):
     
     end_list = time.perf_counter()
 
-    unique = {
-        (RGBA_from_colourKey(pair[0]), 
-        RGBA_from_colourKey(pair[1])) 
-        for pair in zip(diff_pixels, diff_neighs)
-        }
+    zipped = np.hstack((diff_pixels, diff_neighs))
+    # Example:
+    # diff_pixels = [
+    #   [1, 2, 3],
+    #   [4, 5, 6],
+    # ]
+    # diff_neighs = [
+    #   [ 7,  8,  9],
+    #   [10, 11, 12],
+    # ]
+    # zipped = [
+    #   [1, 2, 3,  7,  8,  9],
+    #   [4, 5, 6, 10, 11, 12]
+    # ]
+    end_zipp = time.perf_counter()
 
-    end_conv = time.perf_counter()
+    unique = np.unique(zipped, axis=0)
+
+    end_uniq = time.perf_counter()
 
     adjacencies = set()
     for pair in unique:
-        pixelColour = pair[0]
-        neighColour = pair[1]
+        pixelColour = RGBA_from_colourKey(pair[0:nbChannels])
+        neighColour = RGBA_from_colourKey(pair[nbChannels:])
         adjacencies.add(relation_from_two_RGBAs(pixelColour, neighColour))
         adjacencies.add(relation_from_two_RGBAs(neighColour, pixelColour))
     
     end_register = time.perf_counter()
 
-    duration_comp = round(end_comp - start, 6)
-    duration_list = round(end_list - end_comp, 6)
-    duration_conv = round(end_conv - end_list, 6)
-    duration_regi = round(end_register - end_conv, 6)
-    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Converting: {duration_conv}, Registering: {duration_regi}. {len(adjacencies)} relations in this subset")
+    duration_comp = round(end_comp - start, 4)
+    duration_list = round(end_list - end_comp, 4)
+    duration_zipp = round(end_zipp - end_list, 4)
+    duration_uniq = round(end_uniq - end_zipp, 4)
+    duration_regi = round(end_register - end_uniq, 4)
+    logging.debug(f"Comparing: {duration_comp}s, Listing: {duration_list}, Zipping: {duration_zipp}, Purging: {duration_uniq}, Registering: {duration_regi}. {len(adjacencies)} relations in this subset")
 
     return adjacencies
 
