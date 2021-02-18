@@ -318,32 +318,47 @@ top_rig_neighs = image[0:-1, 1:]
 
 start_process = time.perf_counter()
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    results = [
-        executor.submit(batch_process, bot_pixels, bot_neighs, 'Bottom'),
-        executor.submit(batch_process, rig_pixels, rig_neighs, 'Right')
-    ]
-    if relateDiagonals:
-        results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs, 'Bottom Right'))
-        results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs, 'Top Right'))
+# with concurrent.futures.ThreadPoolExecutor() as executor:
+#     results = [
+#         executor.submit(batch_process, bot_pixels, bot_neighs, 'Bottom'),
+#         executor.submit(batch_process, rig_pixels, rig_neighs, 'Right')
+#     ]
+#     if relateDiagonals:
+#         results.append(executor.submit(batch_process, bot_rig_pixels, bot_rig_neighs, 'Bottom Right'))
+#         results.append(executor.submit(batch_process, top_rig_pixels, top_rig_neighs, 'Top Right'))
     
-    end_setup = time.perf_counter()
+#     end_setup = time.perf_counter()
 
-    duration_union = 0
-    for f in concurrent.futures.as_completed(results):
-        start_union = time.perf_counter()
+#     duration_union = 0
+#     for f in concurrent.futures.as_completed(results):
+#         start_union = time.perf_counter()
         
-        all_adjacencies |= f.result()
+#         all_adjacencies |= f.result()
         
-        end_union = time.perf_counter()
-        duration_union += (end_union - start_union)
+#         end_union = time.perf_counter()
+#         duration_union += (end_union - start_union)
     
-    end_join = time.perf_counter()
+#     end_join = time.perf_counter()
 
-    duration_setup = round(end_setup - start_process, 4)
-    duration_join = round(end_join - end_setup, 4)
-    duration_union = round(duration_union, 4)
-    logging.debug(f"Setup: {duration_setup}s, Join: {duration_join}s, Union: {duration_union}s")
+#     duration_setup = round(end_setup - start_process, 4)
+#     duration_join = round(end_join - end_setup, 4)
+#     duration_union = round(duration_union, 4)
+#     logging.debug(f"Setup: {duration_setup}s, Join: {duration_join}s, Union: {duration_union}s")
+
+adja_bot = batch_process(bot_pixels, bot_neighs, 'Bottom')
+adja_rig = batch_process(rig_pixels, rig_neighs, 'Right')
+if relateDiagonals:
+    adja_bot_rig = batch_process(bot_rig_pixels, bot_rig_neighs, 'Bottom Right')
+    adja_top_rig = batch_process(top_rig_pixels, top_rig_neighs, 'Top Right')
+else:
+    adja_bot_rig = set()
+    adja_top_rig = set()
+
+all_adjacencies |= adja_bot
+all_adjacencies |= adja_rig
+all_adjacencies |= adja_bot_rig
+all_adjacencies |= adja_top_rig
+
 
 end_process = time.perf_counter()
 duration_process = round(end_process - start_process, 6)
