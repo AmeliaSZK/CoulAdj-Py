@@ -1,3 +1,45 @@
+# python-profiler branch
+These instructions are solely for the `python-profiler` branch.
+They demonstrate how to get the profiling stats that I have no idea how
+to interpret.
+
+The files are:
+* [profiling-stats.txt](profiling-stats.txt)
+* [profiling-callers.txt](profiling-callers.txt)
+* [profiling-callees.txt](profiling-callees.txt)
+
+The code to create those files is at line 429 of [CoulAdj-Py.py](CoulAdj-Py.py)
+
+The files were created by running this command:
+```
+(CoulAdj-Py) $ python CoulAdj-Py.py --profile tests/samples/sample-size-1024.png tests/results/result-size-1024.tsv
+```
+
+If this is your first time cloning the repo, you didn't do the First Time Setup,
+*and you have installed Anaconda*, here's the quick start:
+```
+$ conda env create -f environment.yml
+$ conda activate CoulAdj-Py
+(CoulAdj-Py) $ python CoulAdj-Py.py --profile tests/samples/sample-size-1024.png tests/results/result-size-1024.tsv
+```
+
+Compare the Python profiler output with my own reports. (notice we changed `--profile` to `--debug`)
+```
+(CoulAdj-Py) $ python CoulAdj-Py.py --debug tests/samples/sample-size-1024.png tests/results/result-size-1024.tsv
+INFO:Starting
+<...>
+DEBUG:image.shape = (8192, 9216, 4)
+INFO:Height: 8192, Width: 9216, 4 channels, Pixel format: uint8
+DEBUG:1.7850s total. Comparing: 1.4533, Listing: 0.3032, Zipping: 0.0002, Purging: 0.0282, Registering: 0.0000. 131,080 zipped, 48 uniques, 12 relations. (Bottom)
+DEBUG:1.8651s total. Comparing: 1.4964, Listing: 0.3086, Zipping: 0.0004, Purging: 0.0597, Registering: 0.0001. 253,896 zipped, 96 uniques, 20 relations. (Bottom Right)
+DEBUG:1.8934s total. Comparing: 1.5081, Listing: 0.3583, Zipping: 0.0003, Purging: 0.0266, Registering: 0.0000. 122,888 zipped, 64 uniques, 16 relations. (Right)
+DEBUG:1.9854s total. Comparing: 1.5978, Listing: 0.3305, Zipping: 0.0004, Purging: 0.0566, Registering: 0.0000. 253,912 zipped, 96 uniques, 22 relations. (Top Right)
+DEBUG:Setup: 0.0147s, Join: 1.9869s, Union: 0.0001s
+DEBUG:Processing took 2.001997s
+INFO:Finished in 3.44 seconds
+(CoulAdj-Py) $
+```
+
 # Colour Adjacencies
 Reads an image and outputs the colour adjacencies.
 

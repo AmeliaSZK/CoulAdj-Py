@@ -22,12 +22,16 @@ import time
 import logging
 import sys
 import concurrent.futures
+import cProfile, pstats, io
+from pstats import SortKey
 
 version = "0.1"
 
 # ##### PROLOGUE #####
 # ~~~ Profiling ~~~
 startTime = time.perf_counter()
+pr = cProfile.Profile()
+pr.enable()
 
 # ~~~ Command Line Interface ~~~
 diags_flags = ("-d", "--dont-relate-diagonals")
@@ -417,6 +421,34 @@ executionDuration = round(endTime - startTime, 6)
 
 logging.info("Finished in {:.3} seconds".format(executionDuration))
 
+pr.disable()
 if args.profile:
+    # This line is for my bash scripts. Not related to the Python profiler.
     print("{}".format(executionDuration), file=sys.stderr)
+
+    # Stuff for the Python profiler starts here
+    sortby = SortKey.CUMULATIVE 
+    # From the documentation: "This sorts the profile by cumulative time in a function, (...). If you want to understand what algorithms are taking time, [this] is what you would use." 
+    # (https://docs.python.org/3/library/profile.html#instant-user-s-manual)
+    
+    # This block is just boilerplate to link stats to strings to files
+    s1 = io.StringIO()
+    s2 = io.StringIO()
+    s3 = io.StringIO()
+    ps1 = pstats.Stats(pr, stream=s1).strip_dirs().sort_stats(sortby)
+    ps2 = pstats.Stats(pr, stream=s2).strip_dirs().sort_stats(sortby)
+    ps3 = pstats.Stats(pr, stream=s3).strip_dirs().sort_stats(sortby)
+
+    stats_file = open('profiling-stats.txt', 'w')
+    ps1.print_stats() # Notice print_stats
+    stats_file.write(s1.getvalue())
+
+    callers_file = open('profiling-callers.txt', 'w')
+    ps2.print_callers() # Notice print_callers
+    callers_file.write(s2.getvalue())
+
+    callees_file = open('profiling-callees.txt', 'w')
+    ps3.print_callees() # Notice print_callees
+    callees_file.write(s3.getvalue())
+
 
